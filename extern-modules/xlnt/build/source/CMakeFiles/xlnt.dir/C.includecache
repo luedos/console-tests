@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/luedos/bwn_projects/cmake-console-tests/extern-modules/xlnt/source/detail/cryptography/sha1.c
+stddef.h
+-
+stdint.h
+-
+string.h
+-
+
+/home/luedos/bwn_projects/cmake-console-tests/extern-modules/xlnt/source/detail/cryptography/sha512.c
+stddef.h
+-
+stdint.h
+-
+string.h
+-
+

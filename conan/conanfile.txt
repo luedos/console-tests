@@ -1,0 +1,8 @@
+[requires]
+boost/[>=1.68.0]@conan/stable
+libpng/[>=1.6.36]@bincrafters/stable
+jsoncpp/[>=1.8.4]@theirix/stable
+fmt/[>=5.3.0]@bincrafters/stable
+
+[generators]
+visual_studio
