@@ -54,6 +54,7 @@ set(${PROJECT_NAME}_LIBS
 	iterator-wrapper
 	nameof
 	magic_enum
+	numeral-system
 )
 
 if (WIN32)

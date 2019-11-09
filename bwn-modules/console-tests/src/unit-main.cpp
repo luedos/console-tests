@@ -101,6 +101,8 @@
 //#include "Timer\BwnWinTimer.h"
 //#include "Timer\WinTimer.h"
 
+#include "CountingSystem.h"
+
 //#include <magic_enum.hpp>
 
 // Print as hex
@@ -5380,6 +5382,19 @@ int main(int argc, char* argv[])
 #endif // "C++ Templates. Second Edition" fun
 
 
+	// Numeral system fun
+#if true
+	bwn::CountingSystem number(10, 1000);
+
+	std::cout << number.ToString() << std::endl;
+
+	number.ChangeOrder(16);
+
+	std::cout << number.ToString() << std::endl;
+
+#endif // Numeral system fun
+
+
 	// Testing poligon
 #if false
 	bool quit = false;
@@ -5429,7 +5444,7 @@ int main(int argc, char* argv[])
 
 
 	// Cancellation point
-#if false
+#if true
 	{
 		std::cout << "Press any button..";
 		std::getchar();

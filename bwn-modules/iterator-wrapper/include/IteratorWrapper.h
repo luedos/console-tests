@@ -271,7 +271,7 @@ private:
 
 	template<typename IterT>
 	class Impl<IterT, std::void_t<
-		typename std::enable_if<std::is_constructible<typename ForwardIterator<ValueT>::template Impl<IterT>, IterT>::value>::type,
+		decltype(typename ForwardIterator<ValueT>::template Impl<IterT>{ std::declval<IterT&>() }),
 		typename std::enable_if<IterTest<BidirectionalIterator<typename std::iterator_traits<IterT>::value_type>, IterT>::value>::type>>
 		: public ForwardIterator<ValueT>::template Impl<IterT>
 		, public virtual Base<typename std::iterator_traits<IterT>::value_type>

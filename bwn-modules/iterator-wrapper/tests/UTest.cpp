@@ -184,23 +184,23 @@ TEST_CASE("ForwardIterator tests")
 	{
 		std::forward_list<test::Uncanonical> template_list;
 		template_list.resize(test::MaxNumber);
-
+	
 		std::forward_list<test::Uncanonical>::iterator beg = template_list.begin();
 		std::forward_list<test::Uncanonical>::iterator end = template_list.end();
-
+	
 		test::GenContainer(beg, end);
-
+	
 		test::AssertForwardIter<bwn::ForwardIterator<test::Uncanonical>>(beg, end);
 	}
 	SECTION("Pointer")
 	{
 		test::Uncanonical template_arr[test::MaxNumber + 1];
-
+	
 		test::Uncanonical* beg = template_arr;
 		test::Uncanonical* end = template_arr + test::MaxNumber;
-
+	
 		test::GenContainer(beg, end);
-
+	
 		test::AssertForwardIter<bwn::ForwardIterator<test::Uncanonical>>(beg, end);
 	}
 }
