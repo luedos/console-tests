@@ -101,7 +101,7 @@
 //#include "Timer\BwnWinTimer.h"
 //#include "Timer\WinTimer.h"
 
-#include "CountingSystem.h"
+#include "NumeralSystem.h"
 
 //#include <magic_enum.hpp>
 
@@ -5384,13 +5384,13 @@ int main(int argc, char* argv[])
 
 	// Numeral system fun
 #if true
-	bwn::CountingSystem number(10, 1000);
+	bwn::NumeralSystem number(10, 1234);
 
-	std::cout << number.ToString() << std::endl;
+	bwn::NumeralSystem second(10, 99);
 
-	number.ChangeOrder(16);
+	number /= second;
 
-	std::cout << number.ToString() << std::endl;
+	std::cout << number << std::endl;
 
 #endif // Numeral system fun
 
@@ -5444,7 +5444,7 @@ int main(int argc, char* argv[])
 
 
 	// Cancellation point
-#if true
+#if false
 	{
 		std::cout << "Press any button..";
 		std::getchar();

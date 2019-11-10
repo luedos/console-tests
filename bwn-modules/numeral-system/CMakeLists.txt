@@ -2,11 +2,11 @@ cmake_minimum_required (VERSION 3.10)
 project (numeral-system)
 
 set(${PROJECT_NAME}_SOURCE 
-	src/CountingSystem.cpp
+	src/NumeralSystem.cpp
 )
 
 set(${PROJECT_NAME}_HEADERS
-	include/CountingSystem.h
+	include/NumeralSystem.h
 )
 
 add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCE} ${${PROJECT_NAME}_HEADERS})
