@@ -116,71 +116,82 @@ void NumeralSystem::Normalize()
 		return;
 	}
 
-	if (container_.back() < 0)
+	const int32_t sign = (container_.back() > 0) * 2 - 1;
+
+	for (std::size_t i = 0; i < container_.size() - 1; ++i)
 	{
-		for (int32_t i = container_.size() - 2; i >= 0; --i)
+		if (container_[i] * sign < 0)
 		{
-			if (container_[i] > 0)
-			{
-				if (container_[i + 1] != 0)
-				{
-					container_[i] -= base_;
-					++container_[i + 1];
-				}
-				else
-				{
-					int32_t localI = i + 1;
-
-					for (; localI < container_.size() && container_[localI] == 0; ++localI);
-
-					if (localI == container_.size()) {
-						continue;
-					}
-
-					while (localI > i)
-					{
-						++container_[localI];
-						container_[localI - 1] -= base_;
-
-						--localI;
-					}
-				}
-			}
+			container_[i] += base_ * sign;
+			container_[i + 1] -= sign;
 		}
 	}
 
-	if (container_.back() > 0)
-	{
-		for (int32_t i = container_.size() - 2; i >= 0; --i)
-		{
-			if (container_[i] < 0)
-			{
-				if (container_[i + 1] != 0)
-				{
-					container_[i] += base_;
-					--container_[i + 1];
-				}
-				else
-				{
-					int32_t localI = i + 1;
-					for (; localI < container_.size() && container_[localI] == 0; ++localI);
-
-					if (localI == container_.size()) {
-						continue;
-					}
-
-					while (localI > i)
-					{
-						--container_[localI];
-						container_[localI - 1] += base_;
-
-						--localI;
-					}
-
-				}
-			}
-		}
-	}
+	//if (container_.back() < 0)
+	//{
+	//	for (int32_t i = container_.size() - 2; i >= 0; --i)
+	//	{
+	//		if (container_[i] > 0)
+	//		{
+	//			if (container_[i + 1] != 0)
+	//			{
+	//				container_[i] -= base_;
+	//				++container_[i + 1];
+	//			}
+	//			else
+	//			{
+	//				int32_t localI = i + 1;
+	//
+	//				for (; localI < container_.size() && container_[localI] == 0; ++localI);
+	//
+	//				if (localI == container_.size()) {
+	//					continue;
+	//				}
+	//
+	//				while (localI > i)
+	//				{
+	//					++container_[localI];
+	//					container_[localI - 1] -= base_;
+	//
+	//					--localI;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	//
+	//if (container_.back() > 0)
+	//{
+	//	for (int32_t i = container_.size() - 2; i >= 0; --i)
+	//	{
+	//		if (container_[i] < 0)
+	//		{
+	//			if (container_[i + 1] != 0)
+	//			{
+	//				container_[i] += base_;
+	//				--container_[i + 1];
+	//			}
+	//			else
+	//			{
+	//				int32_t localI = i + 1;
+	//				for (; localI < container_.size() && container_[localI] == 0; ++localI);
+	//
+	//				if (localI == container_.size()) {
+	//					continue;
+	//				}
+	//
+	//				while (localI > i)
+	//				{
+	//					--container_[localI];
+	//					container_[localI - 1] += base_;
+	//
+	//					--localI;
+	//				}
+	//
+	//			}
+	//		}
+	//	}
+	//}
 
 	TrimEnd();
 }
