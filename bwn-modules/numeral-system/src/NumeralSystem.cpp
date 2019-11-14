@@ -1,5 +1,6 @@
 #include "NumeralSystem.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 using namespace bwn;
@@ -34,7 +35,7 @@ NumeralSystem::NumeralSystem(const NumeralSystem& other, Digit base)
 	*this = other;
 }
 
-NumeralSystem::NumeralSystem(NumeralSystem&& other, Digit base) noexcept
+NumeralSystem::NumeralSystem(NumeralSystem&& other, Digit base) noexcept(std::is_nothrow_move_constructible<Container>::value)
 	: NumeralSystem{ base }
 {
 	*this = std::move(other);
@@ -45,7 +46,10 @@ NumeralSystem& NumeralSystem::operator=(const NumeralSystem& other)
 	if (this != &other) 
 	{
 		NumeralSystem temp = other;
-		temp.ChangeBase(base_);
+
+		if (base_ != temp.base_) {
+			temp.ChangeBase(base_);
+		}
 
 		container_.swap(temp.container_);
 	}
@@ -53,12 +57,15 @@ NumeralSystem& NumeralSystem::operator=(const NumeralSystem& other)
 	return *this;
 }
 
-NumeralSystem& NumeralSystem::operator=(NumeralSystem&& other) noexcept
+NumeralSystem& NumeralSystem::operator=(NumeralSystem&& other) noexcept(std::is_nothrow_move_assignable<Container>::value)
 {
 	if (this != &other)
 	{
 		NumeralSystem temp = std::move(other);
-		temp.ChangeBase(base_);
+
+		if (base_ != temp.base_) {
+			temp.ChangeBase(base_);
+		}
 
 		container_.swap(temp.container_);
 	}
@@ -78,7 +85,7 @@ void NumeralSystem::ValueShift(std::size_t shift)
 		container_[i] = container_[i - shift];
 	}
 
-	for (int i = 0; i < shift; ++i) {
+	for (std::size_t i = 0; i < shift; ++i) {
 		container_[i] = 0;
 	}
 }
@@ -95,6 +102,10 @@ std::size_t NumeralSystem::TrimEnd()
 
 void NumeralSystem::Normalize()
 {
+	if (container_.empty()) {
+		return;
+	}
+
 	for (std::size_t i = 0; i < container_.size(); ++i)
 	{
 		if (container_[i] >= base_ || container_[i] <= -base_)
@@ -118,7 +129,7 @@ void NumeralSystem::Normalize()
 
 	const int32_t sign = (container_.back() > 0) * 2 - 1;
 
-	for (std::size_t i = 0; i < container_.size() - 1; ++i)
+	for (std::size_t i = 0; i + 1 < container_.size(); ++i)
 	{
 		if (container_[i] * sign < 0)
 		{
@@ -127,73 +138,15 @@ void NumeralSystem::Normalize()
 		}
 	}
 
-	//if (container_.back() < 0)
-	//{
-	//	for (int32_t i = container_.size() - 2; i >= 0; --i)
-	//	{
-	//		if (container_[i] > 0)
-	//		{
-	//			if (container_[i + 1] != 0)
-	//			{
-	//				container_[i] -= base_;
-	//				++container_[i + 1];
-	//			}
-	//			else
-	//			{
-	//				int32_t localI = i + 1;
-	//
-	//				for (; localI < container_.size() && container_[localI] == 0; ++localI);
-	//
-	//				if (localI == container_.size()) {
-	//					continue;
-	//				}
-	//
-	//				while (localI > i)
-	//				{
-	//					++container_[localI];
-	//					container_[localI - 1] -= base_;
-	//
-	//					--localI;
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
-	//
-	//if (container_.back() > 0)
-	//{
-	//	for (int32_t i = container_.size() - 2; i >= 0; --i)
-	//	{
-	//		if (container_[i] < 0)
-	//		{
-	//			if (container_[i + 1] != 0)
-	//			{
-	//				container_[i] += base_;
-	//				--container_[i + 1];
-	//			}
-	//			else
-	//			{
-	//				int32_t localI = i + 1;
-	//				for (; localI < container_.size() && container_[localI] == 0; ++localI);
-	//
-	//				if (localI == container_.size()) {
-	//					continue;
-	//				}
-	//
-	//				while (localI > i)
-	//				{
-	//					--container_[localI];
-	//					container_[localI - 1] += base_;
-	//
-	//					--localI;
-	//				}
-	//
-	//			}
-	//		}
-	//	}
-	//}
-
 	TrimEnd();
+}
+
+void NumeralSystem::FastMul(Digit value)
+{
+	for (auto& digit : container_) {
+		digit *= value;
+	}
+	Normalize();
 }
 
 std::string NumeralSystem::ToString() const
@@ -243,22 +196,22 @@ void NumeralSystem::ChangeBase(Digit base)
 
 	NumeralSystem temp(base);
 
-	NumeralSystem final(base);
+	NumeralSystem accumulator(base);
 
-	for (int i = 0; i < container_.size(); ++i)
+	for (std::size_t i = 0; i < container_.size(); ++i)
 	{
 		temp.container_.clear();
 
 		temp.container_.push_back(container_[i]);
 
-		for (int ii = 0; ii < i; ++ii) {
-			temp *= base_;
+		for (std::size_t ii = 0; ii < i; ++ii) {
+			temp.FastMul(base_);
 		}
-
-		final += temp;
+		
+		accumulator += temp;
 	}
 
-	Swap(final);
+	Swap(accumulator);
 }
 
 const NumeralSystem::Digit& NumeralSystem::operator[] (std::size_t index) const
@@ -270,17 +223,14 @@ const NumeralSystem::Digit& NumeralSystem::operator[] (std::size_t index) const
 	return container_[index];
 }
 
-std::size_t NumeralSystem::GetSize() const
+std::size_t NumeralSystem::GetLength() const
 {
 	return container_.size();
 }
 
 void NumeralSystem::Swap(NumeralSystem& other)
 {
-	Digit temp = base_;
-	base_ = other.base_;
-	other.base_ = temp;
-
+	std::swap(base_, other.base_);
 	container_.swap(other.container_);
 }
 
@@ -455,7 +405,7 @@ NumeralSystem& NumeralSystem::operator+=(const NumeralSystem& other)
 			left.resize(right.size());
 		}
 
-		for (int i = 0; i < right.size(); ++i) {
+		for (std::size_t i = 0; i < right.size(); ++i) {
 			left[i] += right[i];
 		}
 	};
@@ -492,7 +442,7 @@ NumeralSystem& NumeralSystem::operator-=(const NumeralSystem& other)
 			left.resize(right.size());
 		}
 
-		for (int i = 0; i < right.size(); ++i) {
+		for (std::size_t i = 0; i < right.size(); ++i) {
 			left[i] -= right[i];
 		}
 	};
@@ -523,6 +473,12 @@ NumeralSystem& NumeralSystem::operator-=(int64_t value)
 
 NumeralSystem& NumeralSystem::operator*=(const NumeralSystem& other)
 {
+	if (other.container_.empty())
+	{
+		container_.clear();
+		return *this;
+	}
+
 	NumeralSystem hidden{ base_ };
 	const NumeralSystem* correct;
 
@@ -540,27 +496,24 @@ NumeralSystem& NumeralSystem::operator*=(const NumeralSystem& other)
 
 	const std::size_t size = container_.size() + correct->container_.size();
 
-	NumeralSystem ret(base_);
+	NumeralSystem accumulator(base_);
 	NumeralSystem temp(base_);
-	ret.container_.reserve(size);
+	accumulator.container_.reserve(size);
 	temp.container_.reserve(size);
 
 	for (std::size_t i = 0; i < correct->container_.size(); ++i)
 	{
+		const Digit factor = correct->container_[i];
 		temp.container_ = container_;
 
-		for (int ii = 0; ii < temp.container_.size(); ++ii) {
-			temp.container_[ii] *= correct->container_[i];
-		}
-
-		temp.Normalize();
+		temp.FastMul(factor);
 
 		temp.ValueShift(i);
 
-		ret += temp;
+		accumulator += temp;
 	}
 
-	container_.swap(ret.container_);
+	container_.swap(accumulator.container_);
 
 	return *this;
 }
@@ -599,45 +552,45 @@ NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 		return *this;
 	}
 
-	NumeralSystem ret(base_);
-	NumeralSystem temp(base_);
-	NumeralSystem local(base_);
+	NumeralSystem accumulator(base_);
+	NumeralSystem devidend(base_);
+	NumeralSystem devider(base_);
 
-	ret.container_.reserve(container_.size() - correct->container_.size() + 1);
-	temp.container_.reserve(correct->container_.size() + 1);
-	local.container_.reserve(correct->container_.size() + 2);
+	accumulator.container_.reserve(container_.size() - correct->container_.size() + 1);
+	devidend.container_.reserve(correct->container_.size() + 1);
+	devider.container_.reserve(correct->container_.size() + 2);
 
 	for (std::size_t i = 1; i < correct->container_.size(); ++i) {
-		temp.container_.push_back(container_[container_.size() - correct->container_.size() + i]);
+		devidend.container_.push_back(container_[container_.size() - correct->container_.size() + i]);
 	}
 
 	for (int32_t i = container_.size() - correct->container_.size(); i >= 0; --i)
 	{
-		temp.container_.insert(temp.container_.begin(), container_[i]);
+		devidend.container_.insert(devidend.container_.begin(), container_[i]);
 
-		if (temp < *correct)
+		if (devidend < *correct)
 		{
-			ret.container_.push_back(0);
+			accumulator.container_.push_back(0);
 
 			continue;
 		}
 
-		int32_t min = 1;
-		int32_t max = base_;
+		Digit min = 1;
+		Digit max = base_;
 
-		int32_t mid;
+		Digit mid;
 
 		while (max - min > 1)
 		{
 			mid = (max + min) / 2;
 
-			local.container_ = correct->container_;
-			local *= mid;
+			devider.container_ = correct->container_;
+			devider.FastMul(mid);
 
-			if (local <= temp)
+			if (devider <= devidend)
 			{
 				min = mid;
-				if (local == temp) {
+				if (devider == devidend) {
 					break;
 				}
 			}
@@ -647,20 +600,20 @@ NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 			}
 		}
 
-		ret.container_.push_back(min);
+		accumulator.container_.push_back(min);
 
-		local.container_ = correct->container_;
+		devidend -= devider;
 
-		local *= min;
-
-		temp -= local;
+		if (mid == max && max != min) {
+			devidend += *correct;
+		}
 	}
 
-	std::reverse(ret.container_.begin(), ret.container_.end());
+	std::reverse(accumulator.container_.begin(), accumulator.container_.end());
 
-	ret.Normalize();
+	accumulator.Normalize();
 
-	container_.swap(ret.container_);
+	container_.swap(accumulator.container_);
 
 	return *this;
 }

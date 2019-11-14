@@ -5387,6 +5387,8 @@ int main(int argc, char* argv[])
 	bwn::NumeralSystem number(10, 1234);
 
 	bwn::NumeralSystem second(10, 99);
+	std::cout << number << std::endl;
+	std::cout << second << std::endl;
 
 	number /= second;
 

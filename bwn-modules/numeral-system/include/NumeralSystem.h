@@ -18,26 +18,26 @@ public:
 	using Container = std::vector<Digit>;
 
 	//
-	// Constraction and destruction.
+	// Construction and destruction.
 	//
 public:
-	//! Constractor from base.
+	//! Constructor from base.
 	explicit NumeralSystem(Digit base);
-	//! Constractor from base and start value of base ten.
+	//! Constructor from base and start value of base ten.
 	NumeralSystem(Digit base, int64_t value);
-	//! Copy constractor.
+	//! Copy constructor.
 	NumeralSystem(const NumeralSystem& other) = default;
-	//! Copy constractor with different base.
+	//! Copy constructor with different base.
 	NumeralSystem(const NumeralSystem& other, Digit base);
-	//! Move constractor.
-	NumeralSystem(NumeralSystem&& other) noexcept = default;
-	//! Move constractor with a different base.
-	NumeralSystem(NumeralSystem&& other, Digit base) noexcept;
+	//! Move constructor.
+	NumeralSystem(NumeralSystem&& other) noexcept(std::is_nothrow_move_constructible<Container>::value) = default;
+	//! Move constructor with a different base.
+	NumeralSystem(NumeralSystem&& other, Digit base) noexcept(std::is_nothrow_move_constructible<Container>::value);
 
 	//! Copy operator (does not change base).
 	NumeralSystem& operator=(const NumeralSystem& other);
 	//! Move operator (does not change base).
-	NumeralSystem& operator=(NumeralSystem&& other) noexcept;
+	NumeralSystem& operator=(NumeralSystem&& other) noexcept(std::is_nothrow_move_assignable<Container>::value);
 
 	//
 	// Public interface.
@@ -54,7 +54,7 @@ public:
 	//! Returns digit by specific index.
 	const Digit& operator[] (std::size_t index) const;
 	//! Returns number of digits in number.
-	std::size_t GetSize() const;
+	std::size_t GetLength() const;
 	//! Swaps values of two numeral systems.
 	void Swap(NumeralSystem& other);
 	//! Returns false if number equal to zero;
@@ -108,6 +108,8 @@ public:
 	std::size_t TrimEnd();
 	//! Normalizes number.
 	void Normalize();
+	//! Multiplies system by numbers less then max base.
+	void FastMul(Digit value);
 
 	//
 	// Private members.
@@ -118,6 +120,17 @@ public:
 	//! Base of the system.
 	Digit base_;
 };
+
+NumeralSystem operator+ (const NumeralSystem& left, const NumeralSystem& right);
+NumeralSystem operator- (const NumeralSystem& left, const NumeralSystem& right);
+NumeralSystem operator* (const NumeralSystem& left, const NumeralSystem& right);
+NumeralSystem operator/ (const NumeralSystem& left, const NumeralSystem& right);
+bool operator==(const NumeralSystem& left, const NumeralSystem& right);
+bool operator!=(const NumeralSystem& left, const NumeralSystem& right);
+bool operator>(const NumeralSystem& left, const NumeralSystem& right);
+bool operator<(const NumeralSystem& left, const NumeralSystem& right);
+bool operator<=(const NumeralSystem& left, const NumeralSystem& right);
+bool operator>=(const NumeralSystem& left, const NumeralSystem& right);
 
 } // namespace bwn
 
