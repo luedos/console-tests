@@ -266,8 +266,6 @@ bool bwn::operator==(const NumeralSystem& left, const NumeralSystem& right)
 	else
 	{
 		hidden = right;
-		hidden.ChangeBase(right.base_);
-
 		correct = &hidden;
 	}
 
@@ -311,8 +309,6 @@ bool bwn::operator>(const NumeralSystem& left, const NumeralSystem& right)
 	else
 	{
 		hidden = right;
-		hidden.ChangeBase(right.base_);
-
 		correct = &hidden;
 	}
 
@@ -355,8 +351,6 @@ bool bwn::operator<(const NumeralSystem& left, const NumeralSystem& right)
 	else
 	{
 		hidden = right;
-		hidden.ChangeBase(right.base_);
-
 		correct = &hidden;
 	}
 
@@ -489,8 +483,6 @@ NumeralSystem& NumeralSystem::operator*=(const NumeralSystem& other)
 	else
 	{
 		hidden = other;
-		hidden.ChangeBase(base_);
-
 		correct = &hidden;
 	}
 
@@ -528,7 +520,7 @@ NumeralSystem& NumeralSystem::operator*=(int64_t value)
 NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 {
 	if (!other) {
-		throw std::runtime_error{ "Division by zerro." };
+		throw std::logic_error{ "Division by zero." };
 	}
 
 	NumeralSystem hidden{ base_ };
@@ -541,8 +533,6 @@ NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 	else
 	{
 		hidden = other;
-		hidden.ChangeBase(base_);
-
 		correct = &hidden;
 	}
 

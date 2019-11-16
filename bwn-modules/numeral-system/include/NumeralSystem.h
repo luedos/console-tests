@@ -101,7 +101,7 @@ public:
 	//
 	// Private methods.
 	//
-public:
+private:
 	//! Shifts all values to the right, adding zeros in the beginig of the number.
 	void ValueShift(std::size_t shift);
 	//! Trims end from zeros, returns finale size.
@@ -114,7 +114,7 @@ public:
 	//
 	// Private members.
 	//
-public:
+private:
 	//! All numeral digits.
 	Container container_;
 	//! Base of the system.
