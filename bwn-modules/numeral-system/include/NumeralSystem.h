@@ -3,8 +3,38 @@
 #include <vector>
 #include <string>
 
+//
+// Forward declaration for friend functions.
+//
 namespace bwn
 {
+
+class NumeralSystem;
+
+}
+
+
+namespace std
+{
+
+bwn::NumeralSystem abs(const bwn::NumeralSystem& number);
+void swap(bwn::NumeralSystem& left, bwn::NumeralSystem& right);
+
+}
+
+namespace bwn
+{
+
+NumeralSystem operator+ (const NumeralSystem& left, const NumeralSystem& right);
+NumeralSystem operator- (const NumeralSystem& left, const NumeralSystem& right);
+NumeralSystem operator* (const NumeralSystem& left, const NumeralSystem& right);
+NumeralSystem operator/ (const NumeralSystem& left, const NumeralSystem& right);
+bool operator==(const NumeralSystem& left, const NumeralSystem& right);
+bool operator!=(const NumeralSystem& left, const NumeralSystem& right);
+bool operator>(const NumeralSystem& left, const NumeralSystem& right);
+bool operator<(const NumeralSystem& left, const NumeralSystem& right);
+bool operator<=(const NumeralSystem& left, const NumeralSystem& right);
+bool operator>=(const NumeralSystem& left, const NumeralSystem& right);
 
 class NumeralSystem final
 {
@@ -97,6 +127,8 @@ public:
 	friend bool operator>=(const NumeralSystem& left, const NumeralSystem& right);
 	template<typename CharT>
 	friend std::basic_ostream<CharT>& operator<<(std::basic_ostream<CharT>& stream, const bwn::NumeralSystem& value);
+	//! Returns number as absolute version.
+	friend NumeralSystem std::abs(const NumeralSystem& number);
 
 	//
 	// Private methods.
@@ -110,6 +142,8 @@ private:
 	void Normalize();
 	//! Multiplies system by numbers less then max base.
 	void FastMul(Digit value);
+	//! Makes number abs.
+	void MakeAbs();
 
 	//
 	// Private members.
@@ -120,17 +154,6 @@ private:
 	//! Base of the system.
 	Digit base_;
 };
-
-NumeralSystem operator+ (const NumeralSystem& left, const NumeralSystem& right);
-NumeralSystem operator- (const NumeralSystem& left, const NumeralSystem& right);
-NumeralSystem operator* (const NumeralSystem& left, const NumeralSystem& right);
-NumeralSystem operator/ (const NumeralSystem& left, const NumeralSystem& right);
-bool operator==(const NumeralSystem& left, const NumeralSystem& right);
-bool operator!=(const NumeralSystem& left, const NumeralSystem& right);
-bool operator>(const NumeralSystem& left, const NumeralSystem& right);
-bool operator<(const NumeralSystem& left, const NumeralSystem& right);
-bool operator<=(const NumeralSystem& left, const NumeralSystem& right);
-bool operator>=(const NumeralSystem& left, const NumeralSystem& right);
 
 } // namespace bwn
 

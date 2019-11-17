@@ -149,6 +149,13 @@ void NumeralSystem::FastMul(Digit value)
 	Normalize();
 }
 
+void bwn::NumeralSystem::MakeAbs()
+{
+	for (auto& digit : container_) {
+		digit = std::abs(digit);
+	}
+}
+
 std::string NumeralSystem::ToString() const
 {
 	std::string ret;
@@ -523,17 +530,28 @@ NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 		throw std::logic_error{ "Division by zero." };
 	}
 
+	if (!*(this)) {
+		return *this;
+	}
+
+	const int32_t end_sign = (!((other.container_.back() < 0) ^ (container_.back() < 0))) * 2 - 1;
+
 	NumeralSystem hidden{ base_ };
 	const NumeralSystem* correct;
 
-	if (base_ == other.base_)
+	if (base_ == other.base_ && other.container_.back() > 0)
 	{
 		correct = &other;
 	}
 	else
 	{
 		hidden = other;
+		hidden.MakeAbs();
 		correct = &hidden;
+	}
+
+	if (container_.back() < 0) {
+		MakeAbs();
 	}
 
 	if (*this < *correct)
@@ -568,7 +586,8 @@ NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 		Digit min = 1;
 		Digit max = base_;
 
-		Digit mid;
+		Digit mid = min;
+		devider.container_ = correct->container_;
 
 		while (max - min > 1)
 		{
@@ -592,11 +611,13 @@ NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 
 		accumulator.container_.push_back(min);
 
-		devidend -= devider;
-
-		if (mid == max && max != min) {
-			devidend += *correct;
+		if (mid != min)
+		{
+			devider.container_ = correct->container_;
+			devider.FastMul(min);
 		}
+
+		devidend -= devider;
 	}
 
 	std::reverse(accumulator.container_.begin(), accumulator.container_.end());
@@ -604,6 +625,8 @@ NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 	accumulator.Normalize();
 
 	container_.swap(accumulator.container_);
+
+	FastMul(end_sign);
 
 	return *this;
 }
@@ -649,4 +672,18 @@ NumeralSystem bwn::operator/ (const NumeralSystem& left, const NumeralSystem& ri
 	ret /= right;
 
 	return ret;
+}
+
+bwn::NumeralSystem std::abs(const bwn::NumeralSystem& number)
+{
+	bwn::NumeralSystem ret{ number };
+
+	ret.MakeAbs();
+
+	return ret;
+}
+
+void swap(bwn::NumeralSystem& left, bwn::NumeralSystem& right)
+{
+	left.Swap(right);
 }

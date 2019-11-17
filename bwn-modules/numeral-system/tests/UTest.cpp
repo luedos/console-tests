@@ -344,6 +344,6 @@ TEST_CASE("Operations")
 		REQUIRE(!(second_negative2 / first_positive2));
 
 		REQUIRE_THROWS_AS(first_positive10 / bwn::NumeralSystem{ 10 }, std::logic_error);
-		REQUIRE_THROWS_WITH(first_positive10 / bwn::NumeralSystem{ 10 }, "Division by zero");
+		REQUIRE_THROWS_WITH(first_positive10 / bwn::NumeralSystem{ 10 }, "Division by zero.");
 	}
 }
