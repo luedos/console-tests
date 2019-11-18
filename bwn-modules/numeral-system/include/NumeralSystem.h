@@ -88,26 +88,18 @@ public:
 	//! Swaps values of two numeral systems.
 	void Swap(NumeralSystem& other);
 	//! Returns false if number equal to zero;
-	operator bool() const;
+	explicit operator bool() const;
 	//! Adds value of other numeral system.
 	NumeralSystem& operator+=(const NumeralSystem& other);
-	//! Adds value as base 10.
-	NumeralSystem& operator+=(int64_t value);
 	//! Substracts value of other numeral system.
 	NumeralSystem& operator-=(const NumeralSystem& other);
-	//! Substracts value as base 10.
-	NumeralSystem& operator-=(int64_t value);
 	//! Multiplies value of other numeral system.
 	NumeralSystem& operator*=(const NumeralSystem& other);
-	//! Multiplies value as base 10.
-	NumeralSystem& operator*=(int64_t value);
 	//! Divides on value of other numeral system.
 	NumeralSystem& operator/=(const NumeralSystem& other);
-	//! Divides value as base 10.
-	NumeralSystem& operator/=(int64_t value);
 	//! Adds together two numeral system, return system with base of first one.
 	friend NumeralSystem operator+ (const NumeralSystem& left, const NumeralSystem& right);
-	//! Substracts two numeral system, return system with base of first one.
+	//! Substructs two numeral system, return system with base of first one.
 	friend NumeralSystem operator- (const NumeralSystem& left, const NumeralSystem& right);
 	//! Multiplies together two numeral system, return system with base of first one.
 	friend NumeralSystem operator* (const NumeralSystem& left, const NumeralSystem& right);
@@ -144,6 +136,8 @@ private:
 	void FastMul(Digit value);
 	//! Makes number abs.
 	void MakeAbs();
+	//! Compares to values but only on highest digits.
+	static bool LessOnLasts(const NumeralSystem& left, const NumeralSystem& right);
 
 	//
 	// Private members.

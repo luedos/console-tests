@@ -156,6 +156,38 @@ void bwn::NumeralSystem::MakeAbs()
 	}
 }
 
+bool bwn::NumeralSystem::LessOnLasts(const NumeralSystem& left, const NumeralSystem& right)
+{
+	NumeralSystem hidden{ left.base_ };
+	const NumeralSystem* correct;
+
+	if (left.base_ == right.base_)
+	{
+		correct = &right;
+	}
+	else
+	{
+		hidden = right;
+		correct = &hidden;
+	}
+
+	for (auto left_it = left.container_.rbegin(), right_it = correct->container_.rbegin();
+		left_it != left.container_.rend() && right_it != correct->container_.rend();
+		++left_it, ++right_it)
+	{
+
+		if (*left_it > *right_it) {
+			return false;
+		}
+
+		if (*left_it < *right_it) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 std::string NumeralSystem::ToString() const
 {
 	std::string ret;
@@ -280,21 +312,14 @@ bool bwn::operator==(const NumeralSystem& left, const NumeralSystem& right)
 		return false;
 	}
 
-	if (left.container_.empty()) {
-		return true;
-	}
-
-	std::size_t i = left.container_.size();
-
-	do
+	for (auto left_it = left.container_.rbegin(), right_it = correct->container_.rbegin();
+		 left_it != left.container_.rend() && right_it != correct->container_.rend();
+		 ++left_it, ++right_it)
 	{
-		--i;
-
-		if (left.container_[i] != correct->container_[i]) {
+		if (*left_it != *right_it) {
 			return false;
 		}
-
-	} while (i);
+	}
 
 	return true;
 }
@@ -323,25 +348,18 @@ bool bwn::operator>(const NumeralSystem& left, const NumeralSystem& right)
 		return left.container_.size() > correct->container_.size();
 	}
 
-	if (left.container_.empty()) {
-		return true;
-	}
-
-	std::size_t i = left.container_.size();
-
-	do
+	for (auto left_it = left.container_.rbegin(), right_it = correct->container_.rbegin();
+		 left_it != left.container_.rend() && right_it != correct->container_.rend();
+		 ++left_it, ++right_it)
 	{
-		--i;
-
-		if (left.container_[i] > correct->container_[i]) {
+		if (*left_it > *right_it) {
 			return true;
 		}
 
-		if (left.container_[i] < correct->container_[i]) {
+		if (*left_it < *right_it) {
 			return false;
 		}
-
-	} while (i);
+	}
 
 	return false;
 }
@@ -365,25 +383,18 @@ bool bwn::operator<(const NumeralSystem& left, const NumeralSystem& right)
 		return left.container_.size() < correct->container_.size();
 	}
 
-	if (left.container_.empty()) {
-		return true;
-	}
-
-	std::size_t i = left.container_.size();
-
-	do
+	for (auto left_it = left.container_.rbegin(), right_it = correct->container_.rbegin();
+		 left_it != left.container_.rend() && right_it != correct->container_.rend();
+		 ++left_it, ++right_it)
 	{
-		--i;
-
-		if (left.container_[i] > correct->container_[i]) {
-			return false;
-		}
-
-		if (left.container_[i] < correct->container_[i]) {
+		if (*left_it < *right_it) {
 			return true;
 		}
 
-	} while (i);
+		if (*left_it > *right_it) {
+			return false;
+		}
+	}
 
 	return false;
 }
@@ -428,13 +439,6 @@ NumeralSystem& NumeralSystem::operator+=(const NumeralSystem& other)
 	return *this;
 }
 
-NumeralSystem& NumeralSystem::operator+=(int64_t value)
-{
-	NumeralSystem local{ base_, value };
-
-	return *this += local;
-}
-
 NumeralSystem& NumeralSystem::operator-=(const NumeralSystem& other)
 {
 	const auto sub_all = [](Container& left, const Container& right)
@@ -463,13 +467,6 @@ NumeralSystem& NumeralSystem::operator-=(const NumeralSystem& other)
 	Normalize();
 
 	return *this;
-}
-
-NumeralSystem& NumeralSystem::operator-=(int64_t value)
-{
-	NumeralSystem local{ base_, value };
-
-	return *this -= local;
 }
 
 NumeralSystem& NumeralSystem::operator*=(const NumeralSystem& other)
@@ -515,13 +512,6 @@ NumeralSystem& NumeralSystem::operator*=(const NumeralSystem& other)
 	container_.swap(accumulator.container_);
 
 	return *this;
-}
-
-NumeralSystem& NumeralSystem::operator*=(int64_t value)
-{
-	NumeralSystem local{ base_, value };
-
-	return *this *= local;
 }
 
 NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
@@ -629,13 +619,6 @@ NumeralSystem& NumeralSystem::operator/=(const NumeralSystem& other)
 	FastMul(end_sign);
 
 	return *this;
-}
-
-NumeralSystem& NumeralSystem::operator/=(int64_t value)
-{
-	NumeralSystem local{ base_, value };
-
-	return *this *= local;
 }
 
 NumeralSystem bwn::operator+ (const NumeralSystem& left, const NumeralSystem& right)

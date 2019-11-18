@@ -5386,13 +5386,20 @@ int main(int argc, char* argv[])
 #if true
 	bwn::NumeralSystem number(10, 1234);
 
-	bwn::NumeralSystem second(10, 99);
 	std::cout << number << std::endl;
-	std::cout << second << std::endl;
 
-	number /= second;
+	number.ChangeBase(6);
 
 	std::cout << number << std::endl;
+
+	number.ChangeBase(2);
+
+	std::cout << number << std::endl;
+
+	number.ChangeBase(10);
+
+	std::cout << number << std::endl;
+
 
 #endif // Numeral system fun
 
