@@ -31,7 +31,7 @@
 //#include <experimental/filesystem>
 //#include <regex>
 //#include <thread>
-//#include <chrono>
+#include <chrono>
 //#include <functional>
 
 //
@@ -100,6 +100,8 @@
 //#include "Timer\BwnTimer.h"
 //#include "Timer\BwnWinTimer.h"
 //#include "Timer\WinTimer.h"
+
+#include "NumeralSystem.h"
 
 //#include <magic_enum.hpp>
 
@@ -5380,10 +5382,35 @@ int main(int argc, char* argv[])
 #endif // "C++ Templates. Second Edition" fun
 
 
+	// Numeral system fun
+#if true
+	bwn::NumeralSystem number(10, 1234);
+
+	std::cout << number << std::endl;
+
+	number.ChangeBase(6);
+
+	std::cout << number << std::endl;
+
+	number.ChangeBase(2);
+
+	std::cout << number << std::endl;
+
+	number.ChangeBase(10);
+
+	std::cout << number << std::endl;
+
+
+#endif // Numeral system fun
+
+
 	// Testing poligon
 #if false
 	bool quit = false;
 	std::string input;
+
+	std::vector<int32_t> false_container{ 15923423, 985234, 9384536, 2652365, 37346458, 23474576, 4575364, 28735425, 1539345, 495834, 1 };
+	bwn::NumeralSystem number{ 10 };
 
 	while (!quit)
 	{
@@ -5392,8 +5419,11 @@ int main(int argc, char* argv[])
 		std::chrono::time_point<std::chrono::high_resolution_clock> t_start;
 		std::chrono::time_point<std::chrono::high_resolution_clock> t_end;
 
-		std::chrono::time_point<std::chrono::high_resolution_clock> t_false_start = std::chrono::high_resolution_clock::now();
-		std::chrono::time_point<std::chrono::high_resolution_clock> t_false_end = std::chrono::high_resolution_clock::now();
+		std::chrono::time_point<std::chrono::high_resolution_clock> t_false_start{};
+		std::chrono::time_point<std::chrono::high_resolution_clock> t_false_end{};
+
+
+		constexpr uint32_t iterations = 10000;
 
 		bwn::ClearScreen();
 		try {
@@ -5401,13 +5431,17 @@ int main(int argc, char* argv[])
 			t_start = std::chrono::high_resolution_clock::now();
 			{	// OFICIAL START
 
-
+				for (uint32_t i = 0; i < iterations; ++i)
+				{
+					number.container_ = false_container;
+					number.Normalize();
+				}
 
 
 				// OFICIAL END
-				t_false_start = std::chrono::high_resolution_clock::now();
-				std::cout << special_color << "----------Before End----------" << bwn::console_color::reset << std::endl;
-				t_false_end = std::chrono::high_resolution_clock::now();
+				//t_false_start = std::chrono::high_resolution_clock::now();
+				//std::cout << special_color << "----------Before End----------" << bwn::console_color::reset << std::endl;
+				//t_false_end = std::chrono::high_resolution_clock::now();
 			}
 			t_end = std::chrono::high_resolution_clock::now();
 			std::cout << special_color << "----------After End----------" << bwn::console_color::reset << std::endl;
