@@ -401,85 +401,53 @@ const std::string TypeName<T<Args...>>::to_string()
 #if true
 // Char
 template<>
-const std::string TypeName<char>::to_string() {
-	return "char";
-}
+const std::string TypeName<char>::to_string();
 template<>
-const std::string TypeName<unsigned char>::to_string() {
-	return "unsigned char";
-}
+const std::string TypeName<unsigned char>::to_string();
 
 // short
 template<>
-const std::string TypeName<short>::to_string() {
-	return "short";
-}
+const std::string TypeName<short>::to_string();
 template<>
-const std::string TypeName<unsigned short>::to_string() {
-	return "unsigned short";
-}
+const std::string TypeName<unsigned short>::to_string();
 
 // Int
 template<>
-const std::string TypeName<int>::to_string() {
-	return "int";
-}
+const std::string TypeName<int>::to_string();
 template<>
-const std::string TypeName<unsigned int>::to_string() {
-	return "unsigned int";
-}
+const std::string TypeName<unsigned int>::to_string();
 
 // Long
 template<>
-const std::string TypeName<long>::to_string() {
-	return "long";
-}
+const std::string TypeName<long>::to_string();
 template<>
-const std::string TypeName<unsigned long>::to_string() {
-	return "unsigned long";
-}
+const std::string TypeName<unsigned long>::to_string();
 
 // Long long
 template<>
-const std::string TypeName<long long>::to_string() {
-	return "long long";
-}
+const std::string TypeName<long long>::to_string();
 template<>
-const std::string TypeName<unsigned long long>::to_string() {
-	return "unsigned long long";
-}
+const std::string TypeName<unsigned long long>::to_string();
 
 // float
 template<>
-const std::string TypeName<float>::to_string() {
-	return "float";
-}
+const std::string TypeName<float>::to_string();
 
 // double
 template<>
-const std::string TypeName<double>::to_string() {
-	return "double";
-}
+const std::string TypeName<double>::to_string();
 
 // long double
 template<>
-const std::string TypeName<long double>::to_string() {
-	return "long double";
-}
+const std::string TypeName<long double>::to_string();
 
 // Rest
 template<>
-const std::string TypeName<void>::to_string() {
-	return "void";
-}
+const std::string TypeName<void>::to_string();
 template<>
-const std::string TypeName<bool>::to_string() {
-	return "bool";
-}
+const std::string TypeName<bool>::to_string();
 template<>
-const std::string TypeName<decltype(nullptr)>::to_string() {
-	return "nullptr";
-}
+const std::string TypeName<decltype(nullptr)>::to_string();
 #endif // TypeName Variables
 
 
@@ -574,10 +542,7 @@ std::string VariableToString(T* var)
 	return stream.str();
 }
 
-std::string VariableToString(std::nullptr_t var)
-{
-	return "nullptr";
-}
+std::string VariableToString(std::nullptr_t);
 
 template<auto T, auto...Args>
 struct VariableTreat

@@ -61,7 +61,6 @@
 //#include "Node.h"
 //#include "Parser.h"
 //#include "PRJG/PRJG.h"
-//#include "TestOne/TypeName.h"
 //#include "imports-data/Structs.h"
 //#include "PRNG.h"
 //#include "../../pe-packer-furtherwork/pe-packer-lib/src/Unpacker/UnUnpacker-devalloc.h"
@@ -70,6 +69,8 @@
 //#include "distorm-wrapper/DistormWrapper.h"
 //#include "dll-main.h"
 //#include "IteratorWrapper.h"
+//#include "NumeralSystem.h"
+#include "TypeName.h"
 
 //
 // Additional libs includes.
@@ -100,8 +101,6 @@
 //#include "Timer\BwnTimer.h"
 //#include "Timer\BwnWinTimer.h"
 //#include "Timer\WinTimer.h"
-
-#include "NumeralSystem.h"
 
 //#include <magic_enum.hpp>
 
@@ -2337,10 +2336,63 @@ constexpr auto isCallableWith = IsValid([](auto x, auto arg)->decltype((void)x(a
 void TestFunction(int) {}
 #endif // "C++ Templates. Second Edition"
 
+template<char...chars>
+struct ctime_string
+{
+	static constexpr std::size_t size = sizeof...(chars);
+	static const std::string& get_str()
+	{
+		const std::string singleton {chars...};
+		return singleton;
+	}
+};
+
+template<typename, typename>
+struct ctime_concat;
+
+template<char...left, char...right>
+struct ctime_concat<ctime_string<left...>, ctime_string<right...>>
+{
+	using type = ctime_string<left..., right...>;
+};
+
+
+template<char val>
+void to_ctime_string(char)
+{
+	std::cout << "char" << std::endl;
+}
+
+template<int val>
+void to_ctime_string(int)
+{
+	std::cout << "int" << std::endl;
+}
+
+void test(int)
+{
+	std::cout << "test|int"<< std::endl;
+}
+void test(char)
+{
+	std::cout << "test|int"<< std::endl;
+}
+
+template<auto...params>
+void many_to_ctime_string()
+{
+	(to_ctime_string<params>(params), ...);
+}
 
 
 int main(int argc, char* argv[])
 {
+	constexpr const char* str {"some"};
+
+	many_to_ctime_string<10, 11, 's', 22>();
+
+	//std::cout << bwn::TypeTreat<decltype("str"_ct_str)>::get_name() << std::endl;
+
 	// Randomized chances
 #if false
 	std::vector<float> possibleBlocks_{10,20,30,40,50,70,100};
@@ -5383,7 +5435,7 @@ int main(int argc, char* argv[])
 
 
 	// Numeral system fun
-#if true
+#if false
 	bwn::NumeralSystem number(10, 1234);
 
 	std::cout << number << std::endl;
@@ -5399,8 +5451,6 @@ int main(int argc, char* argv[])
 	number.ChangeBase(10);
 
 	std::cout << number << std::endl;
-
-
 #endif // Numeral system fun
 
 

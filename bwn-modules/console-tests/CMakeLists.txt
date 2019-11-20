@@ -19,7 +19,6 @@ set(${PROJECT_NAME}_HEADERS
 	include/PRJG.h
 	include/PRNG.h
 	include/TestOne.h
-	include/TypeName.h
 	include/units-declarations.h
 	include/Utilits.h
 )
@@ -55,6 +54,7 @@ set(${PROJECT_NAME}_LIBS
 	nameof
 	magic_enum
 	numeral-system
+	type-treat
 )
 
 if (WIN32)
