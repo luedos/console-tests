@@ -33,6 +33,8 @@
 //#include <thread>
 #include <chrono>
 //#include <functional>
+//#include <string_view>
+#include <experimental/string_view>
 
 //
 // Boost includes.
@@ -51,6 +53,7 @@
 //#include <boost/algorithm/string.hpp>
 //#include <boost/filesystem.hpp>
 //#include <boost/random.hpp>
+//#include <boost/utility/string_view.hpp>
 
 //
 // Personal includes
@@ -2336,62 +2339,14 @@ constexpr auto isCallableWith = IsValid([](auto x, auto arg)->decltype((void)x(a
 void TestFunction(int) {}
 #endif // "C++ Templates. Second Edition"
 
-template<char...chars>
-struct ctime_string
-{
-	static constexpr std::size_t size = sizeof...(chars);
-	static const std::string& get_str()
-	{
-		const std::string singleton {chars...};
-		return singleton;
-	}
-};
-
-template<typename, typename>
-struct ctime_concat;
-
-template<char...left, char...right>
-struct ctime_concat<ctime_string<left...>, ctime_string<right...>>
-{
-	using type = ctime_string<left..., right...>;
-};
-
-
-template<char val>
-void to_ctime_string(char)
-{
-	std::cout << "char" << std::endl;
-}
-
-template<int val>
-void to_ctime_string(int)
-{
-	std::cout << "int" << std::endl;
-}
-
-void test(int)
-{
-	std::cout << "test|int"<< std::endl;
-}
-void test(char)
-{
-	std::cout << "test|int"<< std::endl;
-}
-
-template<auto...params>
-void many_to_ctime_string()
-{
-	(to_ctime_string<params>(params), ...);
-}
-
 
 int main(int argc, char* argv[])
 {
-	constexpr const char* str {"some"};
+	std::cout << std::boolalpha;
 
-	many_to_ctime_string<10, 11, 's', 22>();
+	std::cout << bwn::TypeTreat<char(void*)>::String::Get() << std::endl;
 
-	//std::cout << bwn::TypeTreat<decltype("str"_ct_str)>::get_name() << std::endl;
+	//bwn::TypeName<int>::String::Get()
 
 	// Randomized chances
 #if false

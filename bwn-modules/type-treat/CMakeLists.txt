@@ -1,43 +1,11 @@
 cmake_minimum_required (VERSION 3.10)
 project (type-treat)
 
-set(${PROJECT_NAME}_SOURCE
-	src/TypeName.cpp
-)
-
-set(${PROJECT_NAME}_HEADERS
-	include/TypeName.h
-)
-
-add_library(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCE} ${${PROJECT_NAME}_HEADERS})
-
-set_target_properties(${PROJECT_NAME}
-	PROPERTIES
-		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${PROJECT_NAME}
-		ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${PROJECT_NAME}
-		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${PROJECT_NAME}
-)
+add_library(${PROJECT_NAME} INTERFACE)
 
 target_include_directories(${PROJECT_NAME}
-	PUBLIC
+	INTERFACE
 		${PROJECT_SOURCE_DIR}/include
-	PRIVATE
-		${PROJECT_SOURCE_DIR}/src
-)
-
-set_target_properties(${PROJECT_NAME}
-	PROPERTIES
-		CXX_STANDARD 17
-)
-
-target_compile_options(${PROJECT_NAME}
-	PRIVATE
-		$<$<CXX_COMPILER_ID:MSVC>:
-			/MP /W3 /Zf
-			$<$<CONFIG:Debug>:/MTd>
-			$<$<CONFIG:Release>:/MT>>
-		$<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>:
-			-Wall -Wextra -Werror -Wpedantic -pedantic-errors -pipe>
 )
 
 set(${PROJECT_NAME}_TEST_SOURCE

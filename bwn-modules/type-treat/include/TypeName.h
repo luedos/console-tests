@@ -1,453 +1,440 @@
 #pragma once
 
-#include <string>
+#include <array>
 
-#if __cplusplus >= 201703L
-#include <sstream>
-#include <iomanip>
+#if defined(TYPE_TREAT_STRING_VIEW)
+using StringView = TYPE_TREAT_STRING_VIEW;
+#elif __cplusplus >= 201703L
+#include <string_view>
+namespace bwn
+{
+namespace type_treat
+{
+using StringView = std::string_view;
+}
+}
+#else
+#include <experimental/string_view>
+namespace bwn
+{
+namespace type_treat
+{
+using StringView = std::experimental::string_view;
+}
+}
 #endif
-
-
-/* HOW TO USE
-* Simply write "TypeTreat<your type>::get_name()", and it will return you string representation of your type.
-* It can work with pointers, references, arrays (sized and unsized), functions, templates.
-* Of course it is not magic and it can't guess name of your type. But you can help it:
-* Simply create full specialisation of function "to_string()" from type "TypeName" for your class:
-* Example:
-
-	const std::string bwn::TypeName<char>::to_string() 
-	{
-		return "char";
-	}
-
-* If your type is template, instead of full specialisation you need to write part specialization of "TypeName" for your class.
-* Here is few examples on that.
-* 1:
-
-	template<typename T1, typename T2, typename T3>
-	struct bwn::TypeName<HugeTemplate<T1,T2,T3>>
-	{
-		static const std::string to_string();
-	};
-	template<typename T1, typename T2, typename T3>
-	const std::string TypeName<HugeTemplate<T1, T2, T3>>::to_string()
-	{
-		static std::string singelton = std::string("HugeTemplate") + "<" + TypeTreat<T1>::get_name() + ", " + TypeTreat<T2>::get_name() + ", " + TypeTreat<T3>::get_name() + ">";
-		return singelton;
-	}
-
-* 2:
-
-	template<tpyname T1, int T2, int* T3>
-	struct bwn::TypeName<HugeTemplate<T1,T2,T3>>
-	{
-		static const std::string to_string();
-	};
-	template<typename T1, typename T2, typename T3>
-	const std::string TypeName<HugeTemplate<T1, T2, T3>>::to_string()
-	{
-		static std::string singelton = std::string("HugeTemplate") + "<" + TypeTreat<T1>::get_name() + ", " + TypeTreat<T2>::to_string() + ", " + TypeTreat<T3>::to_string() + ">";
-		return singelton;
-	}
-
-* 3:
-
-	template<auto T1, auto T2, auto T3>
-	struct bwn::TypeName<HugeTemplate<T1,T2,T3>>
-	{
-		static const std::string to_string();
-	};
-	template<typename T1, typename T2, typename T3>
-	const std::string TypeName<HugeTemplate<T1, T2, T3>>::to_string()
-	{
-		static std::string singelton = std::string("HugeTemplate") + "<" + VariableTreat<T1>::to_string() + ", " + TypeTreat<T2>::to_string() + ", " + TypeTreat<T3>::to_string() + ">";
-		return singelton;
-	}
-
-* For each your template specialization you need to write separate "TypeName" specialization.
-* There are few cases where TypeTreat fails.
-* 1. If template parameters of your class consists from both typename's and auto's, TypeTreat will not found out that your class is template, and return just "default" (example "2").
-* 2. If one of your "auto" template parameters is lvalue reference, "TypeTreat" will return error.
-* Part specialization will save in all of those cases.
-*/
 
 namespace bwn
 {
 
-enum RefEnum
+template<char...CharsV>
+struct CtimeString
 {
-	NONE = 0x0,
-	LValue = 0x1,
-	RValue = 0x2
+	static bwn::type_treat::StringView Get()
+	{
+		static constexpr std::array<char, sizeof...(CharsV)> buffer{ CharsV... };
+		return bwn::type_treat::StringView(buffer.data(), buffer.size());
+	}
+};
+
+template<typename...>
+struct CtimeConcat;
+
+template<char...FirstVs, char...SecondVs>
+struct CtimeConcat<
+	CtimeString<FirstVs...>,
+	CtimeString<SecondVs...>>
+{
+	using String = CtimeString<FirstVs..., SecondVs...>;
+};
+
+template<char...FirstVs, char...SecondVs, typename...TailTs>
+struct CtimeConcat<
+	CtimeString<FirstVs...>,
+	CtimeString<SecondVs...>,
+	TailTs...>
+{
+	using String = typename CtimeConcat<CtimeString<FirstVs..., SecondVs...>, TailTs...>::String;
+};
+
+template<typename...TypeTs>
+using CtimeConcatT = typename CtimeConcat<TypeTs...>::String;
+
+template<uint64_t, typename>
+struct CtimeParseUint;
+
+template<uint64_t ValueV, char...CharsVs>
+struct CtimeParseUint<ValueV, CtimeString<CharsVs...>>
+{
+	using String = typename CtimeParseUint<ValueV / 10, CtimeString<0x30 + ValueV % 10, CharsVs...>>::String;
+};
+template<char FirstV, char...CharsVs>
+struct CtimeParseUint<0, CtimeString<FirstV, CharsVs...>>
+{
+	using String = CtimeString<FirstV, CharsVs...>;
+};
+template<>
+struct CtimeParseUint<0, CtimeString<>>
+{
+	using String = CtimeString<'0'>;
+};
+template<uint64_t ValueV>
+using CtimeParseUintT = typename CtimeParseUint<ValueV, CtimeString<>>::String;
+
+template<uint64_t, typename>
+struct CtimeParseUintHex;
+
+template<uint64_t ValueV, char...CharsVs>
+struct CtimeParseUintHex<ValueV, CtimeString<CharsVs...>>
+{
+	using String = typename CtimeParseUintHex<ValueV / 16, CtimeString<0x30 + ((ValueV % 16) > 9) * 0x27 + ValueV % 16 , CharsVs...>>::String;
+};
+template<char FirstV, char...CharsVs>
+struct CtimeParseUintHex<0, CtimeString<FirstV, CharsVs...>>
+{
+	using String = CtimeString<FirstV, CharsVs...>;
+};
+template<>
+struct CtimeParseUintHex<0, CtimeString<>>
+{
+	using String = CtimeString<'0'>;
+};
+template<uint64_t ValueV>
+using CtimeParseUintHexT = typename CtimeParseUintHex<ValueV, CtimeString<>>::String;
+
+template<bool, typename>
+struct WrapIf;
+template<char...CharsVs>
+struct WrapIf<true, CtimeString<CharsVs...>>
+{
+	using String = CtimeString<'(', CharsVs..., ')'>;
+};
+template<char...CharsVs>
+struct WrapIf<false, CtimeString<CharsVs...>>
+{
+	using String = CtimeString<CharsVs...>;
+};
+
+template<typename>
+struct WrapIfUnempty;
+template<char...CharsVs>
+struct WrapIfUnempty<CtimeString<CharsVs...>>
+{
+	using String = CtimeString<'(', CharsVs..., ')'>;
+};
+template<>
+struct WrapIfUnempty<CtimeString<>>
+{
+	using String = CtimeString<>;
+};
+
+enum ReferenceType
+{
+	NONE_REF 		= 0x0,
+	LVALUE_REF 	= 0x1,
+	RVALUE_REF 	= 0x2
 };
 
 template<typename T, typename...Args>
 struct TypeTreat;
 
-#if __cplusplus >= 201703L
-template<auto T, auto...Args>
-struct VariableTreat;
-#endif
-
-
 	// FunctionTreat
 #if true
 
-template<typename T>
-struct FunctionTreat
+// Do we really need this? ====================================================================================================================
+template<typename RetT>
+struct FunctionTreat : std::false_type
 {
-	using return_type = T;
-
-	static const std::string ArgsToString();
+	using Return = RetT;
+	using ArgsString = CtimeString<>;
 };
 
-template<typename T>
-const std::string FunctionTreat<T>::ArgsToString()
+template<typename RetT>
+struct FunctionTreat<RetT()> : std::true_type
 {
-	return std::string{};
-}
-
-template<typename R>
-struct FunctionTreat<R()>
-{
-	using return_type = R;
-
-	static const std::string ArgsToString();
+	using Return = RetT;
+	using ArgsString = CtimeString<>;
 };
 
-template<typename R>
-const std::string FunctionTreat<R()>::ArgsToString()
+template<typename RetT, typename...ArgsTs>
+struct FunctionTreat<RetT(ArgsTs...)> : std::true_type
 {
-	return std::string{};
-}
-
-template<typename R, typename...Args>
-struct FunctionTreat<R(Args...)>
-{
-	using return_type = R;
-
-	static const std::string ArgsToString();
+	using Return = RetT;
+	using ArgsString = typename TypeTreat<ArgsTs...>::String;
 };
-
-template<typename R, typename...Args>
-const std::string FunctionTreat<R(Args...)>::ArgsToString()
-{
-	return TypeTreat<Args...>::get_name();
-}
-
 
 #endif // FunctionTreat
 
 	// PtrLess
 #if true
-template<typename T, size_t PtrNum = 0, size_t RefNum = 0>
-struct PtrLess
+template<typename TypeT, size_t PtrNumV = 0, size_t RefNumV = 0>
+struct Ptrless : std::false_type
 {
-	using type = T;
-	enum { ref = RefNum, ptrs = PtrNum };
-	static std::string to_string();
+	using Type = TypeT;
+	enum { ref_nesting = PtrNumV, ptr_nesting = RefNumV };
+	using String = CtimeString<>;
 };
-template<typename T, size_t PtrNum, size_t RefNum>
-std::string PtrLess<T, PtrNum, RefNum>::to_string() {
-	return std::string{};
-}
 
-template<typename T>
-struct PtrLess<T&>
+template<typename TypeT>
+struct Ptrless<TypeT&> : std::true_type
 {
-	enum { ref = LValue, ptrs = PtrLess<T, 0, ref>::ptrs };
-	using type = typename PtrLess<T, ptrs, ref>::type;
-	static std::string to_string();
+	using Nested =  Ptrless<TypeT, 0, LVALUE_REF>;
+	enum { ref_nesting = LVALUE_REF, ptr_nesting = Nested::ptr_nesting };
+	using Type = typename Nested::Type;
+	using String = CtimeConcatT<typename Nested::String, CtimeString<'&'>>;
 };
-template<typename T>
-std::string PtrLess<T&>::to_string() {
-	return PtrLess<T>::to_string() + std::string{ "&" };
-}
 
-template<typename T>
-struct PtrLess<T&&>
+template<typename TypeT>
+struct Ptrless<TypeT&&> : std::true_type
 {
-	enum { ref = RValue, ptrs = PtrLess<T, 0, ref>::ptrs };
-	using type = typename PtrLess<T, ptrs, ref>::type;
-	static std::string to_string();
+	using Nested =  Ptrless<TypeT, 0, RVALUE_REF>;
+	enum { ref_nesting = RVALUE_REF, ptr_nesting = Nested::ptr_nesting };
+	using Type = typename Nested::Type;
+	using String = CtimeConcatT<typename Nested::String, CtimeString<'&', '&'>>;
 };
-template<typename T>
-std::string PtrLess<T&&>::to_string() {
-	return PtrLess<T>::to_string() + std::string{ "&&" };
-}
 
-template<typename T, size_t PtrNum, size_t RefNum>
-struct PtrLess<T*, PtrNum, RefNum>
+template<typename TypeT, size_t PtrNumV, size_t RefNumV>
+struct Ptrless<TypeT*, PtrNumV, RefNumV> : std::true_type
 {
-	enum { ref = RefNum, ptrs = PtrLess<T, PtrNum + 1, ref>::ptrs };
-	using type = typename PtrLess<T, ptrs, ref>::type;
-	static std::string to_string();
+	using Nested =  Ptrless<TypeT, PtrNumV + 1, RefNumV>;
+	enum { ref_nesting = RefNumV, ptr_nesting = Nested::ptr_nesting };
+	using Type = typename Nested::Type;
+	using String = CtimeConcatT<typename Nested::String, CtimeString<'*'>>;
 };
-template<typename T, size_t PtrNum, size_t RefNum>
-std::string PtrLess<T*, PtrNum, RefNum>::to_string() {
-	return PtrLess<T>::to_string() + std::string{ "*" };
-}
 
-template<typename T>
-struct PtrLess<T*>
+template<typename TypeT>
+struct Ptrless<TypeT*> : std::true_type
 {
-	enum { ref = NONE, ptrs = PtrLess<T, 1, ref>::ptrs  };
-	using type = typename PtrLess<T, ptrs, ref>::type;
-	static std::string to_string();
+	using Nested =  Ptrless<TypeT, 1, NONE_REF>;
+	enum { ref_nesting = NONE_REF, ptr_nesting = Nested::ptr_nesting };
+	using Type = typename Nested::Type;
+	using String = CtimeConcatT<typename Nested::String, CtimeString<'*'>>;
 };
-template<typename T>
-std::string PtrLess<T*>::to_string() {
-	return PtrLess<T>::to_string() + std::string{ "*" };
-}
 
-template<typename T, size_t PtrNum, size_t RefNum>
-struct PtrLess<T* const, PtrNum, RefNum>
+template<typename TypeT, size_t PtrNumV, size_t RefNumV>
+struct Ptrless<TypeT *const, PtrNumV, RefNumV> : std::true_type
 {
-	enum { ref = RefNum, ptrs = PtrLess<T, PtrNum + 1, ref>::ptrs };
-	using type = typename PtrLess<T, ptrs, ref>::type;
-	static std::string to_string();
+	using Nested =  Ptrless<TypeT, PtrNumV + 1, RefNumV>;
+	enum { ref_nesting = RefNumV, ptr_nesting = Nested::ptr_nesting };
+	using Type = typename Nested::Type;
+	using String = CtimeConcatT<typename Nested::String, CtimeString<'*','c','o','n','s','t'>>;
 };
-template<typename T, size_t PtrNum, size_t RefNum>
-std::string PtrLess<T* const, PtrNum, RefNum>::to_string() {
-	return PtrLess<T>::to_string() + std::string{ "*const" };
-}
 
-template<typename T>
-struct PtrLess<T* const>
+template<typename TypeT>
+struct Ptrless<TypeT *const> : std::true_type
 {
-	enum { ref = NONE, ptrs = PtrLess<T, 1, ref>::ptrs };
-	using type = typename PtrLess<T, ptrs, ref>::type;
-	static std::string to_string();
+	using Nested =  Ptrless<TypeT, 1, NONE_REF>;
+	enum { ref_nesting = NONE_REF, ptr_nesting = Nested::ptr_nesting };
+	using Type = typename Nested::Type;
+	using String = CtimeConcatT<typename Nested::String, CtimeString<'*','c','o','n','s','t'>>;
 };
-template<typename T>
-std::string PtrLess<T* const>::to_string() {
-	return PtrLess<T>::to_string() + std::string{ "*const" };
-}
 
 #endif // PtrLess
 
 	// ArrayTreat
 #if true
-template<typename T>
-struct ArrayTreat
+template<typename TypeT>
+struct ArrayTreat : std::false_type
 {
-	using type = T;
-	using arryptrless = T;
-	enum { is_array = false };
-	static const std::string to_string();
+	using Type = TypeT;
+	using ArrayPtrLess = TypeT;
+	using String = CtimeString<>;
 };
-template<typename T>
-const std::string ArrayTreat<T>::to_string() {
-	return std::string();
-}
 
-template<typename T, size_t SZ>
-struct ArrayTreat<T[SZ]>
+template<typename TypeT, std::size_t SizeV>
+struct ArrayTreat<TypeT[SizeV]> : std::true_type
 {
-	using type = T;
-	using arryptrless = typename ArrayTreat<typename PtrLess<T>::type>::arryptrless;
-	enum { is_array = true };
-	static const std::string to_string();
+	using Type = TypeT;
+	using ArrayPtrLess = typename ArrayTreat<typename Ptrless<TypeT>::Type>::ArrayPtrLess;
+	using String = CtimeConcatT<CtimeString<'['>, CtimeParseUintT<SizeV>, CtimeString<']'>>;
 };
-template<typename T, size_t SZ>
-const std::string ArrayTreat<T[SZ]>::to_string() {
-	return "[" + std::to_string(SZ) + "]";
-}
 
-template<typename T>
-struct ArrayTreat<T[]>
+template<typename TypeT>
+struct ArrayTreat<TypeT[]> : std::true_type
 {
-	using type = T;
-	using arryptrless = typename ArrayTreat<typename PtrLess<T>::type>::arryptrless;
-	enum { is_array = true };
-	static const std::string to_string();
+	using Type = TypeT;
+	using ArrayPtrLess = typename ArrayTreat<typename Ptrless<TypeT>::Type>::ArrayPtrLess;
+	using String = CtimeString<'[',']'>;
 };
-template<typename T>
-const std::string ArrayTreat<T[]>::to_string() {
-	return "[]";
-}
 
-template<typename T>
-std::string ArraysToString()
+template<typename TypeT, typename = std::void_t<>>
+struct ArrayToString
 {
-	std::string out{};
+	using String = typename Ptrless<TypeT>::String;
+};
 
-	using clear = typename PtrLess<T>::type;
-	if (ArrayTreat<clear>::is_array)
-	{
-		out = PtrLess<T>::to_string();
-		if (!out.empty()) {
-			out = "(" + out + ")";
-		}
+template<typename TypeT>
+struct ArrayToString<TypeT, typename std::enable_if<ArrayTreat<typename Ptrless<TypeT>::Type>::value>::type>
+{
+private:
+	using Clear = typename Ptrless<TypeT>::Type;
 
-		out = ArraysToString<typename ArrayTreat<clear>::type>() + out + ArrayTreat<clear>::to_string();
-
-		return out;
-	}
-
-	return PtrLess<T>::to_string() + out;
-}
+public:
+	using String = CtimeConcatT<
+	    typename ArrayToString<typename ArrayTreat<Clear>::Type>::String,
+	    typename WrapIfUnempty<typename Ptrless<TypeT>::String>::String,
+	    typename ArrayTreat<Clear>::String>;
+};
 
 #endif // ArrayTreat
 
 	// TypeName
 #if true
 
-template<typename T>
+template<typename>
 struct TypeName
 {
-	static const std::string to_string();
+	using String = CtimeString<'d','e','f','a','u','l','t'>;
 };
-template<typename T>
-const std::string TypeName<T>::to_string()
-{
-	return "default";
-}
 
-template<typename T>
-struct TypeName<const T>
+template<typename TypeT>
+struct TypeName<const TypeT>
 {
-	static const std::string to_string();
+	using String = CtimeConcatT<CtimeString<'c','o','n','s','t',' '>, typename TypeName<TypeT>::String>;
 };
-template<typename T>
-const std::string TypeName<const T>::to_string()
-{
-	return "const " + TypeName<T>::to_string();
-}
 
-template<template <typename...> class T, typename ...Args>
-struct TypeName<T<Args...>>
+template<template <typename...> class TypeT, typename...ArgsTs>
+struct TypeName<TypeT<ArgsTs...>>
 {
-	static const std::string to_string();
+	using String = CtimeConcatT<
+		CtimeString<'t','e','m','p','l','a','t','e','<'>,
+	    typename TypeTreat<ArgsTs...>::String,
+		CtimeString<'>'>>;
 };
-template<template <typename...> class T, typename ...Args>
-const std::string TypeName<T<Args...>>::to_string()
-{
-	return std::string("template") + "<" + TypeTreat<Args...>::get_name() + ">";
-}
-	
+
 	// Returning to TypeTreat
 #if true
-template<typename R, typename...Args>
-struct TypeName<R(Args...)>
+template<typename RetT, typename...ArgsTs>
+struct TypeName<RetT(ArgsTs...)>
 {
-	static const std::string to_string();
+	using String = typename TypeTreat<RetT(ArgsTs...)>::String;
 };
-template<typename R, typename...Args>
-const std::string TypeName<R(Args...)>::to_string()
-{
-	return TypeTreat<R(Args...)>::get_name();
-}
 
-template<typename T, size_t SZ>
-struct TypeName<T[SZ]>
+template<typename TypeT, size_t SizeV>
+struct TypeName<TypeT[SizeV]>
 {
-	static const std::string to_string();
+	using String = typename TypeTreat<TypeT[SizeV]>::String;
 };
-template<typename T, size_t SZ>
-const std::string TypeName<T[SZ]>::to_string()
-{
-	return TypeTreat<T[SZ]>::get_name();
-}
 
-template<typename T>
-struct TypeName<T[]>
+template<typename TypeT>
+struct TypeName<TypeT[]>
 {
-	static const std::string to_string();
+	using String = typename TypeTreat<TypeT[]>::String;
 };
-template<typename T>
-const std::string TypeName<T[]>::to_string()
-{
-	return TypeTreat<T[]>::get_name();
-}
 
-template<typename T>
-struct TypeName<T*>
+template<typename TypeT>
+struct TypeName<TypeT*>
 {
-	static const std::string to_string();
+	using String = typename TypeTreat<TypeT*>::String;
 };
-template<typename T>
-const std::string TypeName<T*>::to_string()
-{
-	return TypeTreat<T*>::get_name();
-}
 
-template<typename T>
-struct TypeName<T* const>
+template<typename TypeT>
+struct TypeName<TypeT *const>
 {
-	static const std::string to_string();
+	using String = typename TypeTreat<TypeT *const>::String;
 };
-template<typename T>
-const std::string TypeName<T* const>::to_string()
-{
-	return TypeTreat<T* const>::get_name();
-}
+
 #endif // Returning to TypeTreat
-
-#if __cplusplus >= 201703L
-template<template <auto...> typename T, auto...Args>
-struct TypeName<T<Args...>>
-{
-	static const std::string to_string();
-};
-template<template <auto...> typename T, auto...Args>
-const std::string TypeName<T<Args...>>::to_string()
-{
-	return std::string("template") + "<" + VariableTreat<Args...>::to_string() + ">";
-}
-#endif
 
 // TypeName Variables
 #if true
 // Char
 template<>
-const std::string TypeName<char>::to_string();
+struct TypeName<char>
+{
+	using String = CtimeString<'c','h','a','r'>;
+};
 template<>
-const std::string TypeName<unsigned char>::to_string();
+struct TypeName<unsigned char>
+{
+	using String = CtimeString<'u','n','s','i','g','n','e','d',' ','c','h','a','r'>;
+};
 
 // short
 template<>
-const std::string TypeName<short>::to_string();
+struct TypeName<short>
+{
+	using String = CtimeString<'s','h','o','r','t'>;
+};
 template<>
-const std::string TypeName<unsigned short>::to_string();
+struct TypeName<unsigned short>
+{
+	using String = CtimeString<'u','n','s','i','g','n','e','d',' ','s','h','o','r','t'>;
+};
 
 // Int
 template<>
-const std::string TypeName<int>::to_string();
+struct TypeName<int>
+{
+	using String = CtimeString<'i','n','t'>;
+};
 template<>
-const std::string TypeName<unsigned int>::to_string();
+struct TypeName<unsigned int>
+{
+	using String = CtimeString<'u','n','s','i','g','n','e','d',' ','i','n','t'>;
+};
 
 // Long
 template<>
-const std::string TypeName<long>::to_string();
+struct TypeName<long>
+{
+	using String = CtimeString<'l','o','n','g'>;
+};
 template<>
-const std::string TypeName<unsigned long>::to_string();
+struct TypeName<unsigned long>
+{
+	using String = CtimeString<'u','n','s','i','g','n','e','d',' ','l','o','n','g'>;
+};
 
 // Long long
 template<>
-const std::string TypeName<long long>::to_string();
+struct TypeName<long long>
+{
+	using String = CtimeString<'l','o','n','g',' ','l','o','n','g'>;
+};
 template<>
-const std::string TypeName<unsigned long long>::to_string();
-
+struct TypeName<unsigned long long>
+{
+	using String = CtimeString<'u','n','s','i','g','n','e','d',' ','l','o','n','g',' ','l','o','n','g'>;
+};
 // float
 template<>
-const std::string TypeName<float>::to_string();
+struct TypeName<float>
+{
+	using String = CtimeString<'f','l','o','a','t'>;
+};
 
 // double
 template<>
-const std::string TypeName<double>::to_string();
+struct TypeName<double>
+{
+	using String = CtimeString<'d','o','u','b','l','e'>;
+};
 
 // long double
 template<>
-const std::string TypeName<long double>::to_string();
+struct TypeName<long double>
+{
+	using String = CtimeString<'l','o','n','g',' ','d','o','u','b','l','e'>;
+};
 
 // Rest
 template<>
-const std::string TypeName<void>::to_string();
+struct TypeName<void>
+{
+	using String = CtimeString<'v','o','i','d'>;
+};
 template<>
-const std::string TypeName<bool>::to_string();
+struct TypeName<bool>
+{
+	using String = CtimeString<'b','o','o','l'>;
+};
 template<>
-const std::string TypeName<decltype(nullptr)>::to_string();
+struct TypeName<std::nullptr_t>
+{
+	using String = CtimeString<'n','u','l','l','p','t','r','_','t'>;
+};
+
 #endif // TypeName Variables
 
 
@@ -456,122 +443,49 @@ const std::string TypeName<decltype(nullptr)>::to_string();
 	// TypeTreat
 #if true
 
-template<typename T, typename...Args>
+template<typename TypeT, typename...ArgsTs>
 struct TypeTreat
 {
-	static const std::string get_name();
+	using String = CtimeConcatT<
+	    typename TypeTreat<TypeT>::String,
+	    CtimeConcatT<CtimeString<','>, typename TypeTreat<ArgsTs>::String>...>;
 };
 
-template<typename T, typename...Args>
-const std::string TypeTreat<T, Args...>::get_name()
-{
-	return TypeTreat<T>::get_name() 
-		+ (sizeof...(Args) 
-			? (", " + TypeTreat<Args...>::get_name()) 
-			: std::string{});
-}
 
-template<typename T>
-struct TypeTreat<T>
+template<typename TypeT>
+struct TypeTreat<TypeT>
 {
-	static const std::string get_name();
+public:
+	using FirstLayer = typename Ptrless<TypeT>::Type;
+	using StringThaseOne = typename std::conditional<
+		ArrayTreat<FirstLayer>::value,
+		typename ArrayToString<TypeT>::String,
+		typename Ptrless<TypeT>::String>::type;
+	using SecondLayer = typename ArrayTreat<FirstLayer>::ArrayPtrLess;
+
+	template<typename FunctionT, typename PostfixS, typename = std::void_t<>>
+	struct FunctionWrapper
+	{
+		using String = CtimeConcatT<typename TypeName<FunctionT>::String, PostfixS>;
+	};
+
+	template<typename FunctionT, typename PostfixS>
+	struct FunctionWrapper<FunctionT, PostfixS, typename std::enable_if<FunctionTreat<FunctionT>::value>::type>
+	{
+		using String = CtimeConcatT<
+			typename TypeTreat<typename FunctionTreat<FunctionT>::Return>::String,
+			typename WrapIfUnempty<PostfixS>::String,
+			typename WrapIf<true, typename FunctionTreat<FunctionT>::ArgsString>::String>;
+	};
+
+	using String = typename FunctionWrapper<SecondLayer, StringThaseOne>::String;
+public:
+
+	static type_treat::StringView Name()
+	{
+		return String::Get();
+	}
 };
-
-template<typename T>
-const std::string TypeTreat<T>::get_name()
-{
-	using firstLayer = typename PtrLess<T>::type;
-	
-	std::string out{};
-
-	if
-#if __cplusplus >= 201703L
-		constexpr
-#endif
-		(ArrayTreat<firstLayer>::is_array)
-	{
-		out = ArraysToString<T>();
-	}
-	else
-	{
-		out = PtrLess<T>::to_string();
-	}
-
-
-	using secondLayer = typename ArrayTreat<firstLayer>::arryptrless;
-	if
-#if __cplusplus >= 201703L
-		constexpr 
-#endif
-		(std::is_function<secondLayer>::value)
-	{
-		if (!out.empty()) {
-			out = "(" + out + ")";
-		}
-
-		out = TypeTreat<typename FunctionTreat<secondLayer>::return_type>::get_name()
-			+ out
-			+ "(" + FunctionTreat<secondLayer>::ArgsToString() + ")";
-	}
-	else
-	{
-		out = TypeName<secondLayer>::to_string() + out;
-	}
-	return out;
-}
-
-
 
 #endif // TypeTreat
-
-	// VariableTreat
-#if true
-
-#if __cplusplus >= 201703L
-template<typename T>
-std::string VariableToString(T var)
-{
-	return std::to_string(var);
-}
-template<typename T>
-std::string VariableToString(T* var)
-{
-	std::stringstream stream;
-	stream << "0x" << std::hex << std::setw(sizeof(T*) * 2) << std::setfill('0') << var;
-
-	return stream.str();
-}
-
-std::string VariableToString(std::nullptr_t);
-
-template<auto T, auto...Args>
-struct VariableTreat
-{
-	static const std::string to_string();
-};
-
-template<auto T, auto...Args>
-const std::string VariableTreat<T, Args...>::to_string()
-{
-	return VariableTreat<T>::to_string()
-		+ (sizeof...(Args) 
-			? (", " + VariableTreat<Args...>::to_string()) 
-			: std::string{});
-}
-
-template<auto T>
-struct VariableTreat<T>
-{
-	static const std::string to_string();
-};
-
-template<auto T>
-const std::string VariableTreat<T>::to_string()
-{
-	return VariableToString(T);
-}
-#endif
-
-#endif // VariableTreat
-
 }
