@@ -2342,11 +2342,6 @@ void TestFunction(int) {}
 
 int main(int argc, char* argv[])
 {
-	std::cout << std::boolalpha;
-
-	std::cout << bwn::TypeTreat<char(void*)>::String::Get() << std::endl;
-
-	//bwn::TypeName<int>::String::Get()
 
 	// Randomized chances
 #if false
