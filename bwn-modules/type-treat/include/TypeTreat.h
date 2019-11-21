@@ -109,6 +109,23 @@ struct CtimeParseUint<0, CtimeString<>>
 template<uint64_t ValueV>
 using CtimeParseUintT = typename CtimeParseUint<ValueV, CtimeString<>>::String;
 
+template<int64_t ValueV, typename = std::void_t<>>
+struct CtimeParseInt
+{
+	//! Regular parsing as uint for positive numbers.
+	using String = CtimeParseUintT<static_cast<uint64_t>(ValueV)>;
+};
+template<int64_t ValueV>
+struct CtimeParseInt<ValueV, typename std::enable_if<(ValueV < 0)>::type>
+{
+	//! Parsing of number as negative.
+	using String = CtimeConcatT<
+	    CtimeString<'-'>,
+		CtimeParseUintT<static_cast<uint64_t>(-ValueV)>>;
+};
+template<int64_t ValueV>
+using CtimeParseIntT = typename CtimeParseInt<ValueV, CtimeString<>>::String;
+
 template<uint64_t, typename>
 struct CtimeParseUintHex;
 template<uint64_t ValueV, char...CharsVs>

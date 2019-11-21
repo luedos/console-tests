@@ -73,7 +73,7 @@
 //#include "dll-main.h"
 //#include "IteratorWrapper.h"
 //#include "NumeralSystem.h"
-#include "TypeName.h"
+#include "TypeTreat.h"
 
 //
 // Additional libs includes.

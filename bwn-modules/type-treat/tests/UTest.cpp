@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "TypeName.h"
+#include "TypeTreat.h"
 
 template<char FirstV, char...CharsVs>
 struct bwn::TypeName<bwn::CtimeString<FirstV, CharsVs...>>
