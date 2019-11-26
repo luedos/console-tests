@@ -33,6 +33,8 @@
 //#include <thread>
 #include <chrono>
 //#include <functional>
+//#include <string_view>
+#include <experimental/string_view>
 
 //
 // Boost includes.
@@ -51,6 +53,7 @@
 //#include <boost/algorithm/string.hpp>
 //#include <boost/filesystem.hpp>
 //#include <boost/random.hpp>
+//#include <boost/utility/string_view.hpp>
 
 //
 // Personal includes
@@ -61,7 +64,6 @@
 //#include "Node.h"
 //#include "Parser.h"
 //#include "PRJG/PRJG.h"
-//#include "TestOne/TypeName.h"
 //#include "imports-data/Structs.h"
 //#include "PRNG.h"
 //#include "../../pe-packer-furtherwork/pe-packer-lib/src/Unpacker/UnUnpacker-devalloc.h"
@@ -70,6 +72,8 @@
 //#include "distorm-wrapper/DistormWrapper.h"
 //#include "dll-main.h"
 //#include "IteratorWrapper.h"
+//#include "NumeralSystem.h"
+#include "TypeTreat.h"
 
 //
 // Additional libs includes.
@@ -100,8 +104,6 @@
 //#include "Timer\BwnTimer.h"
 //#include "Timer\BwnWinTimer.h"
 //#include "Timer\WinTimer.h"
-
-#include "NumeralSystem.h"
 
 //#include <magic_enum.hpp>
 
@@ -2338,9 +2340,9 @@ void TestFunction(int) {}
 #endif // "C++ Templates. Second Edition"
 
 
-
 int main(int argc, char* argv[])
 {
+
 	// Randomized chances
 #if false
 	std::vector<float> possibleBlocks_{10,20,30,40,50,70,100};
@@ -5383,7 +5385,7 @@ int main(int argc, char* argv[])
 
 
 	// Numeral system fun
-#if true
+#if false
 	bwn::NumeralSystem number(10, 1234);
 
 	std::cout << number << std::endl;
@@ -5399,8 +5401,6 @@ int main(int argc, char* argv[])
 	number.ChangeBase(10);
 
 	std::cout << number << std::endl;
-
-
 #endif // Numeral system fun
 
 

@@ -10,5 +10,6 @@ add_subdirectory(code-file)
 add_subdirectory(dll-tests)
 add_subdirectory(iterator-wrapper)
 add_subdirectory(numeral-system)
+add_subdirectory(type-treat)
 add_subdirectory(console-tests)
 
