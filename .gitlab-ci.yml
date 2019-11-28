@@ -1,0 +1,12 @@
+stages:
+  - build
+
+DebugBuild:
+  stage: build
+  script:
+    - ./scripts/build-x64-debug.sh
+
+ReleaseBuild:
+  stage: build
+  script:
+    - ./scripts/build-x64-release.sh

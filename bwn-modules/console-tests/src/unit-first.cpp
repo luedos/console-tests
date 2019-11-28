@@ -1,4 +1,3 @@
-#include "TypeName.h"
 #include "units-declarations.h"
 
 class UintStructCl

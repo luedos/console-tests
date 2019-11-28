@@ -1,7 +1,6 @@
 cmake_minimum_required (VERSION 3.10)
 project (console-tests)
 
-
 set(my_conan_settings 
 	SETTINGS build_type=${CMAKE_BUILD_TYPE}
 	SETTINGS os=${CMAKE_SYSTEM_NAME}
