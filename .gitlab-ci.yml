@@ -4,9 +4,9 @@ stages:
 DebugBuild:
   stage: build
   script:
-    - ./scripts/build-x64-debug.sh
+    - scripts/build-x64-debug.sh
 
 ReleaseBuild:
   stage: build
   script:
-    - ./scripts/build-x64-release.sh
+    - scripts/build-x64-release.sh
