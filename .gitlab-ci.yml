@@ -11,9 +11,9 @@ before_script:
 DebugBuild:
   stage: build
   script:
-    - scripts/build-x64-debug.sh
+    - "sh scripts/build-x64-debug.sh"
 
 ReleaseBuild:
   stage: build
   script:
-    - scripts/build-x64-release.sh
+    - "sh scripts/build-x64-release.sh"
