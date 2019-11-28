@@ -1,6 +1,11 @@
 stages:
   - build
 
+before_script:
+  - apt-get update 
+    && apt-get -y install cmake
+    && pip install conan
+
 DebugBuild:
   stage: build
   script:
