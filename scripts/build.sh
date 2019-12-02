@@ -18,11 +18,13 @@ else
 	BUILD_ARCH=x64
 fi
 
-if [ "$BUILD_ARCH" == "x86" ]
+if [ "$BUILD_ARCH" = "x86" ]
 then
 	BUILD_ARCH_FLAG="-m32"
+	CONAN_BUILD_ARCH="x86"
 else
 	BUILD_ARCH_FLAG="-m64"
+	CONAN_BUILD_ARCH="x86_64"
 fi
 
 if [ "$3" != "" ]
@@ -76,6 +78,7 @@ cmake \
 	-DENABLE_CLANG_TIDY:BOOL=${ENABLE_CLANG_TIDY} \
 	-DCMAKE_C_FLAGS:STRING=${BUILD_ARCH_FLAG} \
 	-DCMAKE_CXX_FLAGS:STRING=${BUILD_ARCH_FLAG} \
+	-DCONAN_FORCE_ARCH:STRING=${CONAN_BUILD_ARCH} \
 	-Wno-dev \
 	"$@" \
 	../..

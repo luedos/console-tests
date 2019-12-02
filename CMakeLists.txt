@@ -9,6 +9,13 @@ set(my_conan_settings
 	SETTINGS build_type=${CMAKE_BUILD_TYPE}
 	SETTINGS os=${CMAKE_SYSTEM_NAME}
 )
+if (CONAN_FORCE_ARCH)
+	set(my_conan_settings ${my_conan_settings}
+			SETTINGS arch=${CONAN_FORCE_ARCH}
+			SETTINGS build_arch=${CONAN_FORCE_ARCH})
+endif()
+
+message(${my_conan_settings})
 
 if(MSVC)
 
