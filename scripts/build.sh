@@ -4,10 +4,29 @@ start_time=`date +%s`
 
 # Configure build variables.
 BASE_DIR=$(dirname "$0")
-BUILD_MODE=Release
-BUILD_ARCH=x64
+if [ "$1" != "" ] then
+	BUILD_MODE="$1"
+else
+	BUILD_MODE=Release
+fi
+
+if [ "$2" != "" ] then
+	BUILD_ARCH="$2"
+else
+	BUILD_ARCH=x64
+fi
+
+if [ "$3" != "" ] then
+	if [ "$3" ] then
+		ENABLE_TESTING=TRUE
+	else
+		ENABLE_TESTING=FALSE
+	fi
+else
+	ENABLE_TESTING=TRUE
+fi
+
 BUILD_DIR=${BASE_DIR}/../build/gcc-${BUILD_ARCH}-${BUILD_MODE}
-ENABLE_TESTING=TRUE
 ENABLE_CLANG_TIDY=FALSE
 
 # Color configuration.
