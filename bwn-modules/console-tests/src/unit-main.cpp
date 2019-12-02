@@ -5461,14 +5461,6 @@ int main(int argc, char* argv[])
 	}
 #endif // Testing poligon
 
-	try
-	{
-		Throw();
-	}
-	catch(const std::runtime_error& e)
-	{
-		std::cout << e.what() << std::endl;
-	}
 
 	// Cancellation point
 #if false

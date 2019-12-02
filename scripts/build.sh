@@ -18,6 +18,13 @@ else
 	BUILD_ARCH=x64
 fi
 
+if [ "$BUILD_ARCH" == "x86" ]
+then
+	BUILD_ARCH_FLAG="-m32"
+else
+	BUILD_ARCH_FLAG="-m64"
+fi
+
 if [ "$3" != "" ]
 then
 	if [ "$3" ]
@@ -67,6 +74,8 @@ cmake \
 	-DENABLE_TESTING:BOOL=${ENABLE_TESTING} \
 	-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=${ENABLE_CLANG_TIDY} \
 	-DENABLE_CLANG_TIDY:BOOL=${ENABLE_CLANG_TIDY} \
+	-DCMAKE_C_FLAGS:STRING=${BUILD_ARCH_FLAG} \
+	-DCMAKE_CXX_FLAGS:STRING=${BUILD_ARCH_FLAG} \
 	-Wno-dev \
 	"$@" \
 	../..
