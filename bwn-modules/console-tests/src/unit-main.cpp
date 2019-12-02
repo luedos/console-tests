@@ -67,7 +67,7 @@
 //#include "imports-data/Structs.h"
 //#include "PRNG.h"
 //#include "../../pe-packer-furtherwork/pe-packer-lib/src/Unpacker/UnUnpacker-devalloc.h"
-//#include "TransUnits/UnitsDeclarations.h"
+#include "units-declarations.h"
 //#include "code-file/CodeFile.h"
 //#include "distorm-wrapper/DistormWrapper.h"
 //#include "dll-main.h"

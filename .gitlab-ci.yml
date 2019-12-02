@@ -1,0 +1,33 @@
+stages:
+  - build
+
+before_script:
+  - apt-get update 
+    && apt-get -y install cmake
+    && apt-get -y install python
+    && apt-get -y install python-pip
+    && pip install conan
+
+DebugBuildx64:
+  image: registry.gitlab.com/luedos/console-tests:cxx_poligon
+  stage: build
+  script:
+    - "sh scripts/build.sh Debug x64"
+
+ReleaseBuildx64:
+  image: registry.gitlab.com/luedos/console-tests:cxx_poligon
+  stage: build
+  script:
+    - "sh scripts/build.sh Release x64"
+
+DebugBuildx86:
+  image: registry.gitlab.com/luedos/console-tests:cxx_poligon
+  stage: build
+  script:
+    - "sh scripts/build.sh Debug x86"
+
+ReleaseBuildx86:
+  image: registry.gitlab.com/luedos/console-tests:cxx_poligon
+  stage: build
+  script:
+    - "sh scripts/build.sh Release x86"

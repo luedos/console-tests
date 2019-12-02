@@ -17,11 +17,22 @@ class BidirectionalIterator;
 template<typename>
 class RandomAccessIterator;
 
+template<typename>
+class IsIteratorWrapper : public std::false_type {};
+
+template<typename IterT>
+class IsIteratorWrapper<ForwardIterator<IterT>> : public std::true_type {};
+template<typename IterT>
+class IsIteratorWrapper<BidirectionalIterator<IterT>> : public std::true_type {};
+template<typename IterT>
+class IsIteratorWrapper<RandomAccessIterator<IterT>> : public std::true_type {};
+
 template<typename IteratorSubclass, typename TestedIterT, typename = std::void_t<>>
 struct IterTest : public std::false_type {};
 
 template<typename ValueT, typename IterT>
 struct IterTest<ForwardIterator<ValueT>, IterT, std::void_t<
+	typename std::enable_if<!IsIteratorWrapper<IterT>::value>::type,
 	typename std::enable_if<std::is_copy_constructible<IterT>::value>::type, // Checks if iterator is copy constructable.
 	typename std::enable_if<std::is_copy_assignable<IterT>::value>::type, // Checks if iterator is copy assignable.
 	decltype((void)(++std::declval<IterT&>())), // Checks if iterator if forward iteratable.
@@ -104,8 +115,8 @@ private:
 		// Construction and destruction.
 		//
 	public:
-		Impl(const IterT& iter)
-			: iter_{ iter }
+		Impl(IterT iter)
+			: iter_{ std::move(iter) }
 		{}
 
 		//
@@ -154,13 +165,13 @@ public:
 	//! Constructor from iterator.
 	template<typename IterT, typename = decltype((void)(Impl<IterT>(std::declval<IterT>())))>
 	ForwardIterator(IterT iter)
-		: impl_{ std::make_unique<Impl<IterT>>(iter) }
+		: impl_{ std::make_unique<Impl<IterT>>(std::move(iter)) }
 	{
 	}
 	//! Constructor from bidirectional iterator.
-	ForwardIterator(const BidirectionalIterator<ValueT>& other);
+	explicit ForwardIterator(const BidirectionalIterator<ValueT>& other);
 	//! Constructor from random access iterator.
-	ForwardIterator(const RandomAccessIterator<ValueT>& other);
+	explicit ForwardIterator(const RandomAccessIterator<ValueT>& other);
 	//! Copy constructor.
 	ForwardIterator(const ForwardIterator& other)
 	{
@@ -177,7 +188,7 @@ public:
 	}
 	//! Move constructor.
 	ForwardIterator(ForwardIterator&&) noexcept = default;
-	//! Move opeartor.
+	//! Move operator.
 	ForwardIterator& operator=(ForwardIterator&&) noexcept = default;
 
 	//
@@ -236,6 +247,8 @@ private:
 
 };
 
+
+
 template<typename ValueT>
 class BidirectionalIterator
 {
@@ -288,7 +301,7 @@ private:
 		//
 	public:
 		Impl(IterT iter)
-			: BaseImpl{ iter }
+			: BaseImpl{ std::move(iter) }
 		{}
 
 		//
@@ -313,7 +326,7 @@ public:
 	//! Constructor from iterator.
 	template<typename IterT, typename = decltype((void)(Impl<IterT>(std::declval<IterT>())))>
 	BidirectionalIterator(IterT iter)
-		: impl_{ std::make_unique<Impl<IterT>>(iter) }
+		: impl_{ std::make_unique<Impl<IterT>>(std::move(iter)) }
 	{
 	}
 	//! Constructor from random access iterator.
@@ -334,7 +347,7 @@ public:
 	}
 	//! Move constructor.
 	BidirectionalIterator(BidirectionalIterator&&) noexcept = default;
-	//! Move opeartor.
+	//! Move operator.
 	BidirectionalIterator& operator=(BidirectionalIterator&&) noexcept = default;
 
 	//
@@ -465,8 +478,8 @@ private:
 		// Construction and destruction.
 		//
 	public:
-		Impl(const IterT& iter)
-			: BaseImpl{ iter }
+		Impl(IterT iter)
+			: BaseImpl{ std::move(iter) }
 		{}
 
 		//
@@ -519,7 +532,7 @@ public:
 	//! Constructor from iterator.
 	template<typename IterT, typename = decltype((void)(Impl<IterT>(std::declval<IterT>())))>
 	RandomAccessIterator(IterT iter)
-		: impl_{ std::make_unique<Impl<IterT>>(iter) }
+		: impl_{ std::make_unique<Impl<IterT>>(std::move(iter)) }
 	{
 	}
 	//! Copy constructor.
@@ -538,7 +551,7 @@ public:
 	}
 	//! Move constructor.
 	RandomAccessIterator(RandomAccessIterator&&) noexcept = default;
-	//! Move opeartor.
+	//! Move operator.
 	RandomAccessIterator& operator=(RandomAccessIterator&&) noexcept = default;
 
 	//
