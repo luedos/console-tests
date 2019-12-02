@@ -96,4 +96,4 @@ fi
 end_time=`date +%s`
 echo Summary build time was `expr $end_time - $start_time` seconds.
 
-exit EXIT_CODE
+exit $EXIT_CODE
