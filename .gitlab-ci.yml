@@ -8,12 +8,26 @@ before_script:
     && apt-get -y install python-pip
     && pip install conan
 
-DebugBuild:
+DebugBuildx64:
+  image: registry.gitlab.com/luedos/console-tests:cxx_poligon
   stage: build
   script:
-    - "sh scripts/build-x64-debug.sh"
+    - "sh scripts/build.sh Debug x64"
 
-ReleaseBuild:
+ReleaseBuildx64:
+  image: registry.gitlab.com/luedos/console-tests:cxx_poligon
   stage: build
   script:
-    - "sh scripts/build-x64-release.sh"
+    - "sh scripts/build.sh Release x64"
+
+DebugBuildx86:
+  image: registry.gitlab.com/luedos/console-tests:cxx_poligon
+  stage: build
+  script:
+    - "sh scripts/build.sh Debug x86"
+
+ReleaseBuildx86:
+  image: registry.gitlab.com/luedos/console-tests:cxx_poligon
+  stage: build
+  script:
+    - "sh scripts/build.sh Release x86"
