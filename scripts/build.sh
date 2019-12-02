@@ -4,20 +4,24 @@ start_time=`date +%s`
 
 # Configure build variables.
 BASE_DIR=$(dirname "$0")
-if [ "$1" != "" ] then
+if [ "$1" != "" ]
+then
 	BUILD_MODE="$1"
 else
 	BUILD_MODE=Release
 fi
 
-if [ "$2" != "" ] then
+if [ "$2" != "" ]
+then
 	BUILD_ARCH="$2"
 else
 	BUILD_ARCH=x64
 fi
 
-if [ "$3" != "" ] then
-	if [ "$3" ] then
+if [ "$3" != "" ]
+then
+	if [ "$3" ]
+	then
 		ENABLE_TESTING=TRUE
 	else
 		ENABLE_TESTING=FALSE
