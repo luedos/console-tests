@@ -9,10 +9,20 @@ set(my_conan_settings
 	SETTINGS build_type=${CMAKE_BUILD_TYPE}
 	SETTINGS os=${CMAKE_SYSTEM_NAME}
 )
-if (CONAN_FORCE_ARCH)
-	set(my_conan_settings ${my_conan_settings}
-			SETTINGS arch=${CONAN_FORCE_ARCH}
-			SETTINGS build_arch=${CONAN_FORCE_ARCH})
+if (BWN_FORCE_ARCH)
+	if (BWN_FORCE_ARCH STREQUAL "x86")
+		set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m32)
+		set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -m32)
+		set(my_conan_settings ${my_conan_settings}
+			SETTINGS arch=x86
+			SETTINGS arch_build=x86)
+	else()
+		set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m64)
+		set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -m64)
+		set(my_conan_settings ${my_conan_settings}
+				SETTINGS arch=x86_64
+				SETTINGS arch_build=x86_64)
+	endif()
 endif()
 
 message(${my_conan_settings})
