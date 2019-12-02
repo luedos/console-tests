@@ -81,9 +81,11 @@ CheckError "[Make] Failed to build the project."
 
 PrintInfoMsg "Project has been built successfully!"
 
+EXIT_CODE=0
 if [ "$ENABLE_TESTING" = TRUE ]; then
 	PrintInfoMsg "Running tests..."
 	ctest --extra-verbose
+	EXIT_CODE=$?
 fi
 
 if [ "${ENABLE_CLANG_TIDY}" = TRUE ]; then
@@ -93,3 +95,5 @@ fi
 
 end_time=`date +%s`
 echo Summary build time was `expr $end_time - $start_time` seconds.
+
+exit EXIT_CODE
