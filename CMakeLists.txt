@@ -9,6 +9,7 @@ set(my_conan_settings
 	SETTINGS build_type=${CMAKE_BUILD_TYPE}
 	SETTINGS os=${CMAKE_SYSTEM_NAME}
 )
+
 if (BWN_FORCE_ARCH)
 	if (BWN_FORCE_ARCH STREQUAL "x86")
 		set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m32)
@@ -24,8 +25,6 @@ if (BWN_FORCE_ARCH)
 				SETTINGS arch_build=x86_64)
 	endif()
 endif()
-
-message(${my_conan_settings})
 
 if(MSVC)
 
