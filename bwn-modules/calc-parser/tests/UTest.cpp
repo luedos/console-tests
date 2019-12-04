@@ -1206,29 +1206,39 @@ TEST_CASE("Binary operator \"/=\", extrims", "[Value]")
 	{
 		Value bool_val;
 
-		bool_val = max_bool;
-		bool_val /= -1.0 / 10;
+		{
+			const volatile double divider = -1.0 / 10;
+			bool_val = max_bool;
+			bool_val /= divider;
 
-		REQUIRE(bool_val.GetType() == Value::T_INT);
-		REQUIRE(bool_val.AsInt() == -10ll);
+			REQUIRE(bool_val.GetType() == Value::T_INT);
+			REQUIRE(bool_val.AsInt() == static_cast<int64_t>(1ll / divider));
+		}
+		{
+			const volatile double divider = -1.0 / (-static_cast<double>(~0ull) - 1.0);
 
-		bool_val = max_bool;
-		bool_val /= 1.0 / (-static_cast<double>(~0ull) - 1.0);
+			bool_val = max_bool;
+			bool_val /= divider;
 
-		REQUIRE(bool_val.GetType() == Value::T_DOUBLE);
-		REQUIRE(bool_val.AsDouble() == (-static_cast<double>(~0ull) - 1.0));
+			REQUIRE(bool_val.GetType() == Value::T_DOUBLE);
+			REQUIRE(bool_val.AsDouble() == (1ll / divider));
+		}
+		{
+			const volatile double divider = 1.0 / 20;
+			bool_val = max_bool;
+			bool_val /= divider;
 
-		bool_val = max_bool;
-		bool_val /= 1.0 / 20;
+			REQUIRE(bool_val.GetType() == Value::T_INT);
+			REQUIRE(bool_val.AsInt() == static_cast<int64_t>(1ll / divider));
+		}
+		{
+			const volatile double divider = 1.0 / (static_cast<double>(~0ull) * 2.0);
+			bool_val = max_bool;
+			bool_val /= divider;
 
-		REQUIRE(bool_val.GetType() == Value::T_INT);
-		REQUIRE(bool_val.AsInt() == 20ll);
-
-		bool_val = max_bool;
-		bool_val /= 1.0 / (static_cast<double>(~0ull) * 2.0);
-
-		REQUIRE(bool_val.GetType() == Value::T_DOUBLE);
-		REQUIRE(bool_val.AsDouble() == (static_cast<double>(~0ull) * 2.0));
+			REQUIRE(bool_val.GetType() == Value::T_DOUBLE);
+			REQUIRE(bool_val.AsDouble() == (1ll / divider));
+		}
 	}
 
 	SECTION("Overflow of int")
